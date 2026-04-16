@@ -10,48 +10,24 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Tabs -->
-    <div class="bg-white rounded-xl shadow-sm">
-        <div class="border-b border-slate-200">
-            <nav class="flex -mb-px">
-                <a href="#" class="px-6 py-4 border-b-2 border-primary-500 text-primary-600 font-medium">Toutes</a>
-                <a href="#" class="px-6 py-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">En attente</a>
-                <a href="#" class="px-6 py-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">En cours</a>
-                <a href="#" class="px-6 py-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Terminées</a>
-            </nav>
+    <!-- Header -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">Mes demandes</h1>
+            <p class="text-slate-500 mt-1">{{ $demandes->total() }} demande(s) au total</p>
         </div>
-
-        <div class="p-6">
-            <div class="space-y-4">
-                @foreach([
-                    ['id' => 1, 'from' => 'Casablanca', 'to' => 'Rabat', 'type' => 'Meubles', 'date' => '2024-03-15', 'price' => '350 DH', 'status' => 'en_cours'],
-                    ['id' => 2, 'from' => 'Marrakech', 'to' => 'Agadir', 'type' => 'Électroménager', 'date' => '2024-03-10', 'price' => '450 DH', 'status' => 'terminee'],
-                    ['id' => 3, 'from' => 'Tanger', 'to' => 'Tétouan', 'type' => 'Cartons', 'date' => '2024-03-18', 'price' => '200 DH', 'status' => 'en_attente'],
-                ] as $request)
-                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
-                            <i data-lucide="package" class="w-6 h-6 text-primary-500"></i>
-                        </div>
-                        <div>
-                            <p class="font-medium text-slate-900">{{ $request['from'] }} → {{ $request['to'] }}</p>
-                            <p class="text-sm text-slate-500">{{ $request['type'] }} • {{ $request['date'] }}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <p class="font-medium text-primary-500">{{ $request['price'] }}</p>
-                        @if($request['status'] === 'terminee')
-                            <span class="px-3 py-1 bg-green-500 text-white text-sm rounded-full">Terminée</span>
-                        @elseif($request['status'] === 'en_cours')
-                            <span class="px-3 py-1 bg-blue-500 text-white text-sm rounded-full">En cours</span>
-                        @else
-                            <span class="px-3 py-1 border border-primary-500 text-primary-500 text-sm rounded-full">En attente</span>
-                        @endif
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
+        <a href="{{ route('client.create') }}" class="flex items-center gap-2 px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            Nouvelle demande
+        </a>
     </div>
+
+    <div class="flex flex-wrap gap-2 mb-6">
+        <a href="{{ route('client.index') }}" class="px-4 py-2 rounded-full border {{ request()->routeIs('client.index') ? 'bg-primary-500 text-white border-primary-500' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50' }}">Toutes</a>
+        <a href="{{ route('client.requests.in_progress') }}" class="px-4 py-2 rounded-full border {{ request()->routeIs('client.requests.in_progress') ? 'bg-primary-500 text-white border-primary-500' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50' }}">En cours</a>
+        <a href="{{ route('client.requests.delivered') }}" class="px-4 py-2 rounded-full border {{ request()->routeIs('client.requests.delivered') ? 'bg-primary-500 text-white border-primary-500' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50' }}">Terminées</a>
+    </div>
+
+    @include('client.requests.partials.list', ['demandes' => $demandes])
 </div>
 @endsection

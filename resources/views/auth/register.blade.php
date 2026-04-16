@@ -1,184 +1,305 @@
-@extends('layouts.auth')
+@extends('layouts.app')
 
-@section('title', 'Inscription Chauffeur - WasselM3ak')
+@section('title', 'Inscription - WasselM3ak')
 
 @section('content')
-<div class="min-h-screen bg-[#111111] flex items-center justify-center p-4 md:p-8 font-sans antialiased text-slate-200">
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-    {{-- Conteneur Principal (Ombre + Coins Arrondis) --}}
-    <div class="max-w-7xl w-full bg-[#1A1A1A] rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+    <div class="min-h-screen flex bg-gray-50 font-sans" x-data="{
+        step: 1,
+        role: 'expediteur',
+        showPass: false,
+        init() {
+            $watch('step', () => {
+                setTimeout(() => lucide.createIcons(), 50);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+    }" x-cloak>
 
-        {{-- Côté Gauche : Formulaire (Fond sombre) --}}
-        <div class="p-8 md:p-16 flex flex-col justify-center">
-
-            {{-- Logo et En-tête --}}
-            <div class="mb-10">
-                <a href="{{ route('home') }}" class="inline-flex items-center gap-3 mb-6">
-                    <div class="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center shadow-lg">
-                        <i data-lucide="truck" class="w-6 h-6 text-white"></i>
+        <div class="hidden lg:flex lg:w-1/2 relative bg-slate-900 items-center justify-center p-12 overflow-hidden">
+            <img :src="role === 'expediteur'
+                ?
+                'https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1200&q=80' :
+                'https://images.unsplash.com/photo-1586339949916-3e9457bef6d3?auto=format&fit=crop&w=1200&q=80'"
+                class="absolute inset-0 w-full h-full object-cover opacity-40 transition-opacity duration-700"
+                alt="Background">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+            <div class="relative z-10 max-w-md w-full text-white">
+                <div class="flex items-center gap-3 mb-8">
+                    <div
+                        class="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-xl shadow-orange-500/20">
+                        <i data-lucide="truck"></i>
                     </div>
-                    <span class="text-3xl font-bold text-white">
-                        <span class="text-primary-500">Wassel</span>M3ak
-                    </span>
-                </a>
-                <h1 class="text-4xl font-bold text-white tracking-tight mb-2">Créer votre compte chauffeur</h1>
-                <p class="text-slate-400 text-lg">Rejoignez notre réseau de transporteurs professionnels.</p>
+                    <h1 class="text-4xl font-bold tracking-tight italic uppercase">WASSEL<span
+                            class="text-orange-500">M3AK</span></h1>
+                </div>
+                <h2 class="text-5xl font-black leading-tight mb-6 uppercase italic"
+                    x-text="role === 'expediteur' ? 'Envoyez partout' : 'Roulez avec nous'"></h2>
+                <p class="text-lg opacity-80"
+                    x-text="role === 'expediteur' ? 'La solution logistique la plus rapide au Maroc.' : 'Optimisez vos trajets et augmentez vos revenus.'">
+                </p>
             </div>
-
-            {{-- Bouton Connexion Google --}}
-            <button class="w-full flex items-center justify-center gap-3 bg-[#2A2A2A] hover:bg-[#333333] text-white py-3.5 px-6 rounded-xl transition-colors border border-[#3A3A3A] mb-6 shadow-sm">
-                <img src="{{ asset('images/google-icon.svg') }}" alt="Google" class="w-5 h-5">
-                <span class="font-medium">Continuer avec Google</span>
-            </button>
-
-            {{-- Séparateur "ou" --}}
-            <div class="relative mb-8">
-                <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="w-full border-t border-[#3A3A3A]"></div>
-                </div>
-                <div class="relative flex justify-center">
-                    <span class="bg-[#1A1A1A] px-3 text-sm text-slate-500 uppercase tracking-widest">ou</span>
-                </div>
-            </div>
-
-            {{-- Formulaire --}}
-            <form method="POST" action="{{ route('register') }}" class="space-y-6" x-data="{ showPassword: false }">
-                @csrf
-
-                {{-- Barre de Progression (Inspirée de l'image mais adaptée) --}}
-                <div class="mb-8 p-4 bg-[#2A2A2A] rounded-xl border border-[#3A3A3A]">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-sm font-medium text-primary-400">Étape 1 : Informations de base</span>
-                        <span class="text-xs text-slate-500">1 / 3</span>
-                    </div>
-                    <div class="w-full bg-[#3A3A3A] rounded-full h-2">
-                        <div class="bg-primary-500 h-2 rounded-full transition-all duration-300" style="width: 33%"></div>
-                    </div>
-                </div>
-
-                {{-- Erreurs --}}
-                @if($errors->any())
-                    <div class="bg-red-900/50 border border-red-700 text-red-200 rounded-xl p-4 text-sm">
-                        <ul class="list-disc list-inside space-y-1">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                {{-- Champs Nom & Prénom --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-1.5">Nom *</label>
-                        <input type="text" name="nom" value="{{ old('nom') }}" required
-                            class="w-full px-4 py-3 bg-[#2A2A2A] border {{ $errors->has('nom') ? 'border-red-600' : 'border-[#3A3A3A]' }} rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
-                            placeholder="Votre nom">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-1.5">Prénom *</label>
-                        <input type="text" name="prenom" value="{{ old('prenom') }}" required
-                            class="w-full px-4 py-3 bg-[#2A2A2A] border {{ $errors->has('prenom') ? 'border-red-600' : 'border-[#3A3A3A]' }} rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
-                            placeholder="Votre prénom">
-                    </div>
-                </div>
-
-                {{-- Champ Email --}}
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1.5">Adresse email *</label>
-                    <input type="email" name="email" value="{{ old('email') }}" required
-                        class="w-full px-4 py-3 bg-[#2A2A2A] border {{ $errors->has('email') ? 'border-red-600' : 'border-[#3A3A3A]' }} rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
-                        placeholder="votre@email.com">
-                </div>
-
-                {{-- Champ Téléphone --}}
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1.5">Téléphone *</label>
-                    <input type="tel" name="phone" value="{{ old('phone') }}" required
-                        class="w-full px-4 py-3 bg-[#2A2A2A] border {{ $errors->has('phone') ? 'border-red-600' : 'border-[#3A3A3A]' }} rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
-                        placeholder="+212 600 000 000">
-                </div>
-
-                {{-- Champ Mot de Passe --}}
-                <div class="sm:col-span-2 relative">
-                    <label class="block text-sm font-medium text-slate-300 mb-1.5">Mot de passe *</label>
-                    <div class="relative">
-                        <input :type="showPassword ? 'text' : 'password'" name="password" required
-                            class="w-full px-4 py-3 pr-12 bg-[#2A2A2A] border {{ $errors->has('password') ? 'border-red-600' : 'border-[#3A3A3A]' }} rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition"
-                            placeholder="••••••••">
-                        <button type="button" @click="showPassword = !showPassword"
-                            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1">
-                            <i data-lucide="eye" class="w-5 h-5" x-show="!showPassword"></i>
-                            <i data-lucide="eye-off" class="w-5 h-5" x-show="showPassword" x-cloak></i>
-                        </button>
-                    </div>
-                </div>
-
-                {{-- Bouton Soumettre --}}
-                <div class="pt-4">
-                    <button type="submit"
-                        class="w-full bg-primary-600 hover:bg-primary-500 text-white py-4 px-8 rounded-xl font-semibold transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-primary-500/20 active:scale-[0.98]">
-                        <span>Continuer vers l'étape 2</span>
-                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                    </button>
-                </div>
-            </form>
-
-            {{-- Lien Connexion --}}
-            <p class="text-center mt-10 text-slate-500">
-                Déjà un compte ?
-                <a href="{{ route('login') }}" class="text-primary-400 hover:text-primary-300 font-medium transition-colors">
-                    Se connecter
-                </a>
-            </p>
         </div>
 
-        {{-- Côté Droit : Illustration & Texte (Fond dégradé violet comme l'image) --}}
-        <div class="hidden md:flex flex-col justify-between bg-gradient-to-br from-[#6D28D9] via-[#4F46E5] to-[#7C3AED] p-16 relative overflow-hidden">
-            
-            {{-- Effet de grille en arrière-plan (optionnel, pour plus de ressemblance) --}}
-            <div class="absolute inset-0 opacity-10" style="background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 40px 40px;"></div>
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12">
+            <div
+                class="max-w-xl w-full bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 overflow-hidden flex border border-gray-100 min-h-[650px]">
 
-            {{-- Illustration centrale --}}
-            <div class="relative z-10 flex-grow flex items-center justify-center">
-                <img src="{{ asset('images/driver-illustration.png') }}" 
-                     alt="Illustration Chauffeur WasselM3ak" 
-                     class="max-w-full h-auto object-contain transform hover:scale-105 transition-transform duration-500 ease-out drop-shadow-2xl">
-            </div>
+                <div class="w-20 md:w-28 bg-[#1e293b] flex flex-col items-center py-10 transition-all"
+                    x-show="step > 1 && step < 5">
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+                            :class="step === 2 ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' :
+                                'bg-green-500 text-white'">
+                            <i :data-lucide="step > 2 ? 'check' : 'user'" class="w-5 h-5"></i>
+                        </div>
+                        <div class="w-0.5 h-8 bg-slate-700" :class="step > 2 && 'bg-green-500'"></div>
 
-            {{-- Texte du bas (Inspiré de l'image) --}}
-            <div class="relative z-10 text-center mt-12 bg-white/5 backdrop-blur-sm p-8 rounded-2xl border border-white/10 shadow-xl">
-                <div class="inline-flex items-center justify-center w-14 h-14 bg-white rounded-2xl shadow-inner mb-6">
-                     <i data-lucide="shield-check" class="w-8 h-8 text-primary-600"></i>
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+                            :class="step === 3 ? 'bg-orange-500 text-white shadow-lg' : (step > 3 ? 'bg-green-500 text-white' :
+                                'bg-slate-800 text-slate-500')">
+                            <i :data-lucide="role === 'expediteur' ? 'map-pin' : 'truck'" class="w-5 h-5"></i>
+                        </div>
+
+                        <template x-if="role === 'chauffeur'">
+                            <div class="contents">
+                                <div class="w-0.5 h-8 bg-slate-700" :class="step > 3 && 'bg-green-500'"></div>
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+                                    :class="step === 4 ? 'bg-orange-500 text-white shadow-lg' : (step > 4 ?
+                                        'bg-green-500 text-white' : 'bg-slate-800 text-slate-500')">
+                                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
                 </div>
-                <h3 class="text-3xl font-extrabold text-white leading-tight mb-4">Un service fiable et sécurisé</h3>
-                <p class="text-purple-100 text-lg max-w-md mx-auto">Offrez le meilleur service de transport à nos clients en rejoignant une plateforme conçue pour votre réussite.</p>
-            </div>
-            
-            {{-- Bouton Retour (Déplacé ici pour le style) --}}
-            <a href="{{ route('home') }}" class="absolute top-6 right-6 z-20 flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg backdrop-blur-sm transition-colors border border-white/10 shadow-md text-sm">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                Retour à l'accueil
-            </a>
-        </div>
 
+                <div class="flex-1 p-8 md:p-12 self-center">
+                    <form action="register" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="user_type" :value="role">
+                        @if ($errors->any())
+                            <div
+                                class="mb-6 p-4 bg-orange-50 border-l-4 border-orange-500 rounded-r-xl flex gap-3 animate-fade-in">
+                                <i data-lucide="alert-circle" class="w-5 h-5 text-orange-500 shrink-0"></i>
+                                <div>
+                                    <h4 class="text-sm font-bold text-orange-800 uppercase tracking-tight">Oups ! Quelque
+                                        chose ne va pas</h4>
+                                    <ul class="mt-1 list-disc list-inside text-xs text-orange-700 space-y-1">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        @endif
+
+                        <div x-show="step === 1">
+                            <h2 class="text-3xl font-bold text-slate-800 mb-2">Bienvenue !</h2>
+                            <p class="text-slate-500 mb-8">Quel est votre profil ?</p>
+                            <div class="space-y-4">
+                                <div @click="role = 'expediteur'"
+                                    :class="role === 'expediteur' ? 'border-orange-500 bg-orange-50/50 ring-2 ring-orange-500' :
+                                        'border-slate-200'"
+                                    class="p-6 border-2 rounded-[2rem] cursor-pointer transition-all">
+                                    <h3 class="font-bold text-lg">Expéditeur</h3>
+                                    <p class="text-sm text-slate-500">Je veux envoyer des marchandises.</p>
+                                </div>
+                                <div @click="role = 'chauffeur'"
+                                    :class="role === 'chauffeur' ? 'border-orange-500 bg-orange-50/50 ring-2 ring-orange-500' :
+                                        'border-slate-200'"
+                                    class="p-6 border-2 rounded-[2rem] cursor-pointer transition-all">
+                                    <h3 class="font-bold text-lg">Transporteur</h3>
+                                    <p class="text-sm text-slate-500">Je propose mes services de transport.</p>
+                                </div>
+                            </div>
+                            <button type="button" @click="step = 2"
+                                class="w-full mt-8 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-bold shadow-xl shadow-orange-500/20 transition-all">Continuer</button>
+                        </div>
+
+                        <div x-show="step === 2" x-transition>
+                            <h2
+                                class="text-2xl font-bold text-slate-800 mb-8 uppercase italic tracking-tight text-orange-500">
+                                Infos Personnelles</h2>
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label class="text-[10px] font-black uppercase text-slate-400">Prénom</label><input
+                                            type="text" name="prenom"
+                                            class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none border-slate-200 transition-all">
+                                    </div>
+                                    <div><label class="text-[10px] font-black uppercase text-slate-400">Nom</label><input
+                                            type="text" name="nom"
+                                            class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none border-slate-200 transition-all">
+                                    </div>
+                                </div>
+                                <div><label class="text-[10px] font-black uppercase text-slate-400">Email</label><input
+                                        type="email" name="email"
+                                        class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none border-slate-200 transition-all">
+                                </div>
+                                <div><label class="text-[10px] font-black uppercase text-slate-400">Téléphone</label><input
+                                        type="tel" name="phone"
+                                        class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none border-slate-200 transition-all">
+                                </div>
+                                <div x-data="{ show: false }" class="relative">
+                                    <label class="text-[10px] font-black uppercase text-slate-400">Mot de passe</label>
+                                    <input :type="show ? 'text' : 'password'" name="password"
+                                        class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none border-slate-200 transition-all">
+                                    <button type="button" @click="show = !show"
+                                        class="absolute right-3 top-7 text-slate-400"><i
+                                            :data-lucide="show ? 'eye-off' : 'eye'" class="w-4 h-4"></i></button>
+                                </div>
+                                <div><label
+                                        class="text-[10px] font-black uppercase text-slate-400">Confirmation</label><input
+                                        type="password" name="password_confirmation"
+                                        class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none border-slate-200 transition-all">
+                                </div>
+                            </div>
+                            <div class="flex justify-between mt-8">
+                                <button type="button" @click="step = 1"
+                                    class="text-slate-400 hover:text-orange-500 transition-colors"><i
+                                        data-lucide="arrow-left"></i></button>
+                                <button type="button" @click="step = 3"
+                                    class="bg-orange-500 px-8 py-3 text-white rounded-lg font-bold shadow-lg shadow-orange-500/20 active:scale-95 transition-all">Suivant</button>
+                            </div>
+                        </div>
+
+                        <div x-show="step === 3" x-transition>
+                            <h2 class="text-2xl font-bold text-slate-800 mb-8 uppercase italic tracking-tight text-orange-500"
+                                x-text="role === 'expediteur' ? 'Profil Expéditeur' : 'Détails du Véhicule'"></h2>
+
+                            <div x-show="role === 'expediteur'" class="space-y-4">
+                                <div>
+                                    <label class="text-[10px] font-black uppercase text-slate-400">Adresse
+                                        Principale</label>
+                                    <input type="text" name="adresse_principale"
+                                        class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-500 outline-none border-slate-200 transition-all"
+                                        placeholder="Ex: Hay Riad, Rabat">
+                                </div>
+                                <div class="bg-orange-50 p-4 rounded-xl border border-orange-100 flex gap-3">
+                                    <i data-lucide="info" class="w-5 h-5 text-orange-500"></i>
+                                    <p class="text-xs text-orange-700 italic leading-relaxed">En tant qu'expéditeur, vous
+                                        pourrez suivre vos colis en temps réel dès la validation de votre profil.</p>
+                                </div>
+                            </div>
+
+                            <div x-show="role === 'chauffeur'" class="space-y-4">
+                                <div>
+                                    <label class="text-[10px] font-black uppercase text-slate-400">Type de Véhicule</label>
+                                    <select name="type_vehicule"
+                                        class="w-full p-3 border rounded-lg bg-white outline-none border-slate-200 focus:ring-2 focus:ring-orange-500">
+                                        <option value="moto">Moto / Triporteur</option>
+                                        <option value="camionnette">Camionnette (Kangoo/Partner)</option>
+                                        <option value="camion">Poids lourd / Master</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black uppercase text-slate-400">Immatriculation</label>
+                                    <input type="text" name="immatriculation"
+                                        class="w-full p-3 border rounded-lg outline-none uppercase border-slate-200 focus:ring-2 focus:ring-orange-500"
+                                        placeholder="12345-A-1">
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label class="text-[10px] font-black uppercase text-slate-400">Charge
+                                            (KG)</label><input type="number" name="capacite_charge_kg"
+                                            class="w-full p-3 border rounded-lg outline-none border-slate-200 focus:ring-2 focus:ring-orange-500">
+                                    </div>
+                                    <div><label class="text-[10px] font-black uppercase text-slate-400">Volume
+                                            (M³)</label><input type="number" name="capacite_volume_m3"
+                                            class="w-full p-3 border rounded-lg outline-none border-slate-200 focus:ring-2 focus:ring-orange-500">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between mt-8">
+                                <button type="button" @click="step = 2" class="text-slate-400"><i
+                                        data-lucide="arrow-left"></i></button>
+                                <button type="button" @click="role === 'expediteur' ? step = 5 : step = 4"
+                                    class="bg-orange-500 px-8 py-3 text-white rounded-lg font-bold shadow-lg shadow-orange-500/20 active:scale-95 transition-all"
+                                    x-text="role === 'expediteur' ? 'Terminer' : 'Suivant'"></button>
+                            </div>
+                        </div>
+
+                        <div x-show="step === 4 && role === 'chauffeur'" x-transition>
+                            <h2
+                                class="text-2xl font-bold text-slate-800 mb-8 uppercase italic tracking-tight text-orange-500">
+                                Vérification Documents</h2>
+                            <div class="space-y-3">
+                                <div
+                                    class="p-4 border-2 border-dashed border-slate-200 rounded-xl text-center hover:border-orange-400 transition-colors bg-slate-50/50">
+                                    <label class="cursor-pointer block">
+                                        <input type="file" name="doc_permis" class="hidden">
+                                        <i data-lucide="upload-cloud" class="mx-auto text-slate-300 w-8 h-8"></i>
+                                        <p class="text-[10px] font-black uppercase text-slate-500 mt-2">Permis de conduire
+                                        </p>
+                                    </label>
+                                </div>
+                                <div
+                                    class="p-4 border-2 border-dashed border-slate-200 rounded-xl text-center hover:border-orange-400 transition-colors bg-slate-50/50">
+                                    <label class="cursor-pointer block">
+                                        <input type="file" name="doc_carte_grise" class="hidden">
+                                        <i data-lucide="upload-cloud" class="mx-auto text-slate-300 w-8 h-8"></i>
+                                        <p class="text-[10px] font-black uppercase text-slate-500 mt-2">Carte Grise</p>
+                                    </label>
+                                </div>
+                                <div
+                                    class="p-4 border-2 border-dashed border-slate-200 rounded-xl text-center hover:border-orange-400 transition-colors bg-slate-50/50">
+                                    <label class="cursor-pointer block">
+                                        <input type="file" name="doc_assurance" class="hidden">
+                                        <i data-lucide="upload-cloud" class="mx-auto text-slate-300 w-8 h-8"></i>
+                                        <p class="text-[10px] font-black uppercase text-slate-500 mt-2">Assurance Véhicule
+                                        </p>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="flex justify-between mt-8">
+                                <button type="button" @click="step = 3" class="text-slate-400"><i
+                                        data-lucide="arrow-left"></i></button>
+                                <button type="button" @click="step = 5"
+                                    class="bg-orange-600 px-8 py-3 text-white rounded-lg font-bold shadow-lg shadow-orange-600/20 active:scale-95 transition-all">Finaliser</button>
+                            </div>
+                        </div>
+
+                        <div x-show="step === 5" class="text-center py-10">
+                            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i data-lucide="check" class="text-green-500 w-10 h-10"></i>
+                            </div>
+                            <h2 class="text-3xl font-black text-slate-800 italic uppercase">C'est prêt !</h2>
+                            <p class="text-slate-500 mt-4 leading-relaxed">Votre compte est créé. <span
+                                    x-show="role === 'chauffeur'">Nos administrateurs vérifient vos documents sous
+                                    24h.</span></p>
+                            <button type="submit"
+                                class="block w-full mt-10 py-4 bg-slate-900 text-white rounded-2xl font-bold shadow-xl hover:bg-slate-800 transition-all active:scale-95 uppercase tracking-widest text-sm">Tableau
+                                de Bord</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-{{-- Styles additionnels pour les champs obligatoires (*) et x-cloak --}}
-<style>
-    [x-cloak] { display: none !important; }
-    label::after {
-        content: " *";
-        color: #ef4444; /* red-500 */
-    }
-    /* Désactiver l'autofill jaune sur fond sombre */
-    input:-webkit-autofill,
-    input:-webkit-autofill:hover, 
-    input:-webkit-autofill:focus, 
-    input:-webkit-autofill:active{
-        -webkit-box-shadow: 0 0 0 30px #2A2A2A inset !important;
-        -webkit-text-fill-color: white !important;
-    }
-</style>
+    <script>
+        lucide.createIcons();
+    </script>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        /* Personnalisation du scrollbar pour correspondre au thème */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #f97316;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+    </style>
 @endsection

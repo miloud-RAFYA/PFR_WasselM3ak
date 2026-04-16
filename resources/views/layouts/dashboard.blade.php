@@ -61,14 +61,14 @@
     
     @stack('styles')
 </head>
-<body class="font-sans antialiased text-slate-800 bg-slate-50" x-data="{ sidebarOpen: true }">
+<body class="font-sans antialiased text-slate-800 bg-slate-50 h-screen overflow-hidden" x-data="{ sidebarOpen: true }">
     
-    <div class="min-h-screen flex">
+    <div class="h-screen flex overflow-hidden">
         <!-- Sidebar -->
         @yield('sidebar')
         
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col">
+        <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Header -->
             @include('partials.dashboard-header')
             

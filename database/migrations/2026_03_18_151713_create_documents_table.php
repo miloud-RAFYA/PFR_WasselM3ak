@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('chauffeur_id')->constrained('chauffeurs')->onDelete('cascade');
             $table->string('type');
             $table->string('chemin');
-            $table->string('status')->default('en_attente');
+            $table->string('status')->default('en_attente')->after('chemin');
             $table->string('commentaire_admin')->nullable();
             $table->timestamps();
         });

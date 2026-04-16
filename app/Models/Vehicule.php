@@ -11,6 +11,7 @@ class Vehicule extends Model
     use HasFactory;
 
     protected $fillable = [
+        'chauffeur_id',
         'type',
         'immatriculation',
         'capacite_charge_kg',

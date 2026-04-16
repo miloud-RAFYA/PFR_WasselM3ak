@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('suives', function (Blueprint $table) {
             $table->id();
             $table->foreignId('demande_id')->constrained('demandes')->onDelete('cascade');
-             $table->integer('latitude');
-             $table->integer('longitude');
-             $table->string('horodatage');
+            $table->decimal('latitude', 10, 7);
+            $table->decimal('longitude', 10, 7);
+            $table->timestamp('horodatage')->nullable();
             $table->timestamps();
         });
     }

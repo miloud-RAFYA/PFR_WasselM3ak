@@ -11,6 +11,8 @@ class Offre extends Model
     use HasFactory;
 
     protected $fillable = [
+        'chauffeur_id',
+        'demande_id',
         'status',
         'montant_propose',
     ];

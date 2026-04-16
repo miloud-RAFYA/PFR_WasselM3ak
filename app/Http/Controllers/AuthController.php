@@ -18,19 +18,14 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        
+        DB::beginTransaction();
 
-       
-            // 1. Récupérer le rôle
+        try {
             $role = Role::where('type', $request->user_type)->firstOrFail();
-
-            // 2. Upload photo de profil
-            
             $path = $request->hasFile('photo_profil') ? $request->file('photo_profil')->store('profiles', 'public') : null;
 
-            // 3. Création de l'utilisateur
             $user = User::create([
                 'nom' => $request->nom,
                 'prenom' => $request->prenom,
@@ -42,17 +37,60 @@ class AuthController extends Controller
                 'est_actif' => true,
                 'est_verifie' => false,
             ]);
-             var_dump($user);
-            exit;
-            // 4. Logique spécifique selon le type d'utilisateur
-            
+            //  var_dump($user);
+            if ($request->user_type === 'chauffeur') {
+                $chauffeur = $user->chauffeur()->create([
+                    'status' => 'disponible',
+                    'note_moyenne' => 0,
+                    'total_livraisons' => 0,
+                ]);
+                //  var_dump($chauffeur);
+                $vehicule = $chauffeur->vehicule()->create([
+                    'type' => $request->type_vehicule,
+                    'immatriculation' => $request->immatriculation,
+                    'capacite_charge_kg' => $request->capacite_charge_kg,
+                    'capacite_volume_m3' => $request->capacite_volume_m3 ?? 0,
+                ]);
+                //   var_dump($vehicule);
+                foreach (['permis_conduire', 'carte_grise', 'assurance'] as $doc) {
+                    if ($request->hasFile($doc)) {
+                        $docPath = $request->file($doc)->store('documents', 'public');
+                        //  var_dump($docPath);
+                        $doc=$chauffeur->documents()->create([
+                            'type' => $doc,
+                            'chemin' => $docPath,
+                            'status' => 'en_attente',
+                        ]);
+                         
+                    }
+                }
 
-            
+                $redirectRoute = 'driver.dashboard';
+
+            } elseif ($request->user_type === 'expediteur') {
+                $user->expediteur()->create([
+                    'adresse_principale' => $request->adresse_principale,
+                    'total_envois' => 0,
+                ]);
+
+                $redirectRoute = 'client.dashboard';
+            } else {
+                throw new \Exception("Type d'utilisateur non reconnu.");
+            }
+
+            DB::commit();
             Auth::login($user);
 
-            return redirect()->route('');
+            return redirect()->route($redirectRoute);
 
-        
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Erreur lors de l'inscription : " . $e->getMessage());
+
+            return back()->withInput()->withErrors([
+                'error' => 'Une erreur est survenue lors de la création de votre compte.'
+            ]);
+        }
     }
 
     public function showLogin()

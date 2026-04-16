@@ -10,10 +10,17 @@ class Suive extends Model
     /** @use HasFactory<\Database\Factories\SuiveFactory> */
     use HasFactory;
 
-     protected $fillable = [
+    protected $fillable = [
+        'demande_id',
         'latitude',
         'longitude',
         'horodatage',
+    ];
+
+    protected $casts = [
+        'latitude' => 'decimal:7',
+        'longitude' => 'decimal:7',
+        'horodatage' => 'datetime',
     ];
     
     public function demande(){

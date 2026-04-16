@@ -24,16 +24,10 @@ class AdminDashboardController extends Controller
             'demandes_en_cours' => Demande::where('status', 'in_progress')->count(),
             'demandes_terminees' => Demande::where('status', 'delivered')->count(),
         ];
-
-       
         $usersByRole = User::with('role')->get()->groupBy(function($user) {
             return $user->role?->type ?? 'sans rôle';
         })->map->count();
-
-      
-        $recentDemandes = Demande::with('expediteur.user')->latest()->take(5)->get();
-
-        
+        $recentDemandes = Demande::with('expediteur.user')->latest()->take(5)->get(); 
         $recentOffres = Offre::with('chauffeur.user', 'demande')->latest()->take(5)->get();
 
         return view('admin.dashboard', compact('stats', 'usersByRole', 'recentDemandes', 'recentOffres'));

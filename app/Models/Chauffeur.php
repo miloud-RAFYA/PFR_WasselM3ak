@@ -27,4 +27,7 @@ class Chauffeur extends Model
     public function offres(){
         return $this->hasMany(Offre::class);
     }
+    public function is_available(){
+        
+    }
 }

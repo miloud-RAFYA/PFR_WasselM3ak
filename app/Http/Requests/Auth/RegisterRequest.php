@@ -31,15 +31,8 @@ class RegisterRequest extends FormRequest
             'password' => 'required|string|min:8|confirmed',
             'user_type' => 'required|string|in:expediteur,chauffeur',
             'adresse_principale' => 'required_if:user_type,expediteur|nullable|string|max:500',
-            'type_vehicule'      => 'required_if:user_type,chauffeur|nullable|string',
-            'immatriculation'    => 'required_if:user_type,chauffeur|nullable|string|unique:vehicules,immatriculation',
-            'capacite_charge_kg' => 'required_if:user_type,chauffeur|nullable|numeric|min:0',
-            'capacite_volume_m3' => 'nullable|numeric|min:0',
 
-            'permis_conduire' => 'required_if:user_type,chauffeur|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'carte_grise' => 'required_if:user_type,chauffeur|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'assurance' => 'required_if:user_type,chauffeur|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'terms' => 'required|accepted',
+            
         ];
     }
     public function messages(): array

@@ -15,7 +15,7 @@ class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
-
+    use Notifiable;
     /**
      * The attributes that are mass assignable.
      *
@@ -65,13 +65,15 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }
-   
-    
-    public function chauffeur(){
+
+
+    public function chauffeur()
+    {
         return $this->hasOne(Chauffeur::class);
     }
 
-    public function expediteur(){
+    public function expediteur()
+    {
         return $this->hasOne(Expediteur::class);
     }
 
