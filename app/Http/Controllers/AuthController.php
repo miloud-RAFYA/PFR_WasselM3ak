@@ -21,7 +21,6 @@ class AuthController extends Controller
     public function register(RegisterRequest $request)
     {
         DB::beginTransaction();
-
         try {
             $role = Role::where('type', $request->user_type)->firstOrFail();
             $path = $request->hasFile('photo_profil') ? $request->file('photo_profil')->store('profiles', 'public') : null;
@@ -56,17 +55,15 @@ class AuthController extends Controller
                     if ($request->hasFile($doc)) {
                         $docPath = $request->file($doc)->store('documents', 'public');
                         //  var_dump($docPath);
-                        $doc=$chauffeur->documents()->create([
+                        $doc = $chauffeur->documents()->create([
                             'type' => $doc,
                             'chemin' => $docPath,
                             'status' => 'en_attente',
                         ]);
-                         
                     }
                 }
 
                 $redirectRoute = 'driver.dashboard';
-
             } elseif ($request->user_type === 'expediteur') {
                 $user->expediteur()->create([
                     'adresse_principale' => $request->adresse_principale,
@@ -82,7 +79,6 @@ class AuthController extends Controller
             Auth::login($user);
 
             return redirect()->route($redirectRoute);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("Erreur lors de l'inscription : " . $e->getMessage());

@@ -23,11 +23,7 @@
                         Visualisez l’emplacement en temps réel
                     </p>
                 </div>
-
-                <a href="{{ route('client.requests.suivi') }}"
-                    class="px-4 py-2 border rounded-lg hover:bg-slate-50">
-                    Retour
-                </a>
+     
             </div>
 
             <div class="bg-slate-100 relative" style="height: 500px;">

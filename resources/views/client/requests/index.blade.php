@@ -24,8 +24,7 @@
 
     <div class="flex flex-wrap gap-2 mb-6">
         <a href="{{ route('client.index') }}" class="px-4 py-2 rounded-full border {{ request()->routeIs('client.index') ? 'bg-primary-500 text-white border-primary-500' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50' }}">Toutes</a>
-        <a href="{{ route('client.requests.in_progress') }}" class="px-4 py-2 rounded-full border {{ request()->routeIs('client.requests.in_progress') ? 'bg-primary-500 text-white border-primary-500' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50' }}">En cours</a>
-        <a href="{{ route('client.requests.delivered') }}" class="px-4 py-2 rounded-full border {{ request()->routeIs('client.requests.delivered') ? 'bg-primary-500 text-white border-primary-500' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50' }}">Terminées</a>
+
     </div>
 
     @include('client.requests.partials.list', ['demandes' => $demandes])

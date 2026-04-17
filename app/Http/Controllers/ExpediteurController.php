@@ -10,6 +10,7 @@ use App\Models\Offre;
 use Illuminate\Http\Request;
 use App\Events\MessageSent;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ExpediteurController extends Controller
 {
@@ -31,7 +32,6 @@ class ExpediteurController extends Controller
             ->limit(3)
             ->get();
 
-        // Calculer les économies réalisées 
         $economiesRealisees = 0;
         $demandesLivrees = $demandes->where('status', 'delivered');
         foreach ($demandesLivrees as $demande) {
@@ -55,61 +55,6 @@ class ExpediteurController extends Controller
         return view('client.dashboard', compact('expediteur', 'demandes', 'demandesRecentes', 'chauffeursDisponibles', 'stats'));
     }
 
-    /**
-     * Afficher toutes les demandes du client
-     */
-    public function requests()
-    {
-        $user = Auth::user();
-        $expediteur = $user->expediteur;
-
-        if (!$expediteur) {
-            return redirect()->route('home')->with('error', 'Accès non autorisé.');
-        }
-
-        $demandes = Demande::where('expediteur_id', $expediteur->id)
-            ->with('offres.chauffeur.user')
-            ->latest()
-            ->paginate(10);
-
-        return view('client.requests.index', compact('demandes'));
-    }
-
-    public function requestsInProgress()
-    {
-        $user = Auth::user();
-        $expediteur = $user->expediteur;
-
-        if (!$expediteur) {
-            return redirect()->route('home')->with('error', 'Accès non autorisé.');
-        }
-
-        $demandes = Demande::where('expediteur_id', $expediteur->id)
-            ->where('status', 'in_progress')
-            ->with('offres.chauffeur.user')
-            ->latest()
-            ->paginate(10);
-
-        return view('client.requests.in_progress', compact('demandes'));
-    }
-
-    public function requestsDelivered()
-    {
-        $user = Auth::user();
-        $expediteur = $user->expediteur;
-
-        if (!$expediteur) {
-            return redirect()->route('home')->with('error', 'Accès non autorisé.');
-        }
-
-        $demandes = Demande::where('expediteur_id', $expediteur->id)
-            ->where('status', 'delivered')
-            ->with('offres.chauffeur.user')
-            ->latest()
-            ->paginate(10);
-
-        return view('client.requests.delivered', compact('demandes'));
-    }
     public function requestsSuiviGps(Request $request)
     {
         $user = Auth::user();
@@ -134,7 +79,7 @@ class ExpediteurController extends Controller
 
         return view('client.requests.suivi-gps', compact('demandes', 'selectedDemande'));
     }
-    
+
     public function messages()
     {
         $user = Auth::user();
@@ -232,7 +177,7 @@ class ExpediteurController extends Controller
         try {
             broadcast(new MessageSent($message))->toOthers();
         } catch (\Exception $e) {
-            \Log::warning('Broadcast failed: ' . $e->getMessage());
+            Log::warning('Broadcast failed: ' . $e->getMessage());
         }
 
         return response()->json([
@@ -264,7 +209,6 @@ class ExpediteurController extends Controller
      */
     public function updateProfile(Request $request)
     {
-        /** @var \App\Models\User|null $user */
         $user = Auth::user();
         $expediteur = $user->expediteur;
 
@@ -294,10 +238,5 @@ class ExpediteurController extends Controller
         return redirect()
             ->route('profile')
             ->with('success', 'Profil mis à jour avec succès.');
-    }
-
-    public function index()
-    {
-        return view('admin.dashboard');
     }
 }

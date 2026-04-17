@@ -11,12 +11,6 @@ use Illuminate\Support\Facades\Auth;
 
 class OffreController extends Controller
 {
-    public function verifie()
-    {
-        // Auth::user()->
-
-    }
-
     public function store(Request $request, Demande $demande)
     {
         $chauffeur = Auth::user()->chauffeur;
@@ -82,5 +76,8 @@ class OffreController extends Controller
         $conversation->update(['last_message' => $message->content]);
 
         return back()->with('success', 'Offre acceptée et conversation créée dans vos messages.');
+    }
+    public function create(Demande $demande){
+        return view('driver.offres.create',compact('demande'));
     }
 }

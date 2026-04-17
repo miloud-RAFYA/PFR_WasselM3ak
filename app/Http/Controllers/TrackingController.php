@@ -14,18 +14,18 @@ class TrackingController extends Controller
     {
         $user = Auth::user();
 
-        if ($user?->isClient()) {
+        if ($user->role->type === 'expediteur') {
             $expediteur = $user->expediteur;
 
             if (!$expediteur || $demande->expediteur_id !== $expediteur->id) {
                 abort(403);
             }
-        } elseif ($user?->isDriver()) {
+        } elseif ($user?->role?->type === 'chauffeur') {
             $chauffeur = $user->chauffeur;
             if (!$chauffeur || ! $demande->isAssignedToDriver($chauffeur)) {
                 abort(403);
             }
-        } elseif (! $user?->isAdmin()) {
+        } elseif (!$user?->role?->type === 'admin') {
             abort(403);
         }
 

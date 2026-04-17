@@ -58,12 +58,6 @@
                     <span x-show="sidebarOpen">Mes demandes</span>
                 </a>
 
-                <a href="{{ route('client.requests.suivi') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg transition {{ $isSuivi ? 'bg-primary-500 text-white' : 'text-slate-600 hover:bg-slate-100' }}">
-
-                    <i data-lucide="map" class="w-5 h-5"></i>
-                    <span x-show="sidebarOpen">Suivi</span>
-                </a>
 
                 <a href="{{ route('client.requests.suivi_gps') }}"
                     class="flex items-center gap-3 px-3 py-2 rounded-lg transition {{ $isSuiviGps ? 'bg-primary-500 text-white' : 'text-slate-600 hover:bg-slate-100' }}">

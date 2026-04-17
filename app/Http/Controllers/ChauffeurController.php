@@ -11,8 +11,10 @@ use App\Models\Offre;
 use Carbon\Month;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Events\MessageSent;
 use App\Events\UserTyping;
+use App\Http\Requests\Vehicule\StoreRequest;
 
 
 class ChauffeurController extends Controller
@@ -37,7 +39,7 @@ class ChauffeurController extends Controller
         $monthlyOffers = $acceptedOffers->filter(fn($offre) => $offre->created_at->isCurrentMonth());
 
         $stats = [
-            'courses_ce_mois' => $acceptedOffers->count(),
+            'courses_ce_mois' => $acceptedOffers->filter(fn($offre) => $offre->created_at->isCurrentMonth()),
             'offres_en_attente' => $pendingOffers->count(),
             'gains_ce_mois' => $monthlyOffers->sum('montant_propose'),
             'revenu_total' => $acceptedOffers->sum('montant_propose'),
@@ -55,6 +57,11 @@ class ChauffeurController extends Controller
             'demandes'
         ));
     }
+    public function index()
+    {
+        $demandes = Demande::latest()->paginate(10);
+        return view('driver.available', compact('demandes'));
+    }
     public function toggleAvailability()
     {
         $chauffeur =  Auth::user()->chauffeur;
@@ -62,11 +69,6 @@ class ChauffeurController extends Controller
         $chauffeur->save();
 
         return back()->with('success', 'Statut mis à jour');
-    }
-    public function index()
-    {
-        $demandes = Demande::latest()->paginate(10);
-        return view('driver.available', compact('demandes'));
     }
 
     public function trips()
@@ -98,7 +100,7 @@ class ChauffeurController extends Controller
         return view('driver.vehicle', compact('chauffeur'));
     }
 
-    public function updateVehicle(Request $request)
+    public function updateVehicle(StoreRequest $request)
     {
         $user = Auth::user();
         $chauffeur = $user->chauffeur;
@@ -107,21 +109,10 @@ class ChauffeurController extends Controller
             return redirect()->route('home')->with('error', 'Accès non autorisé.');
         }
 
-        $request->validate([
-            'brand' => 'nullable|string|max:255',
-            'model' => 'nullable|string|max:255',
-            'license_plate' => 'nullable|string|max:50',
-            'year' => 'nullable|integer|min:1900|max:' . now()->year,
-            'capacity' => 'nullable|numeric|min:0',
-            'length' => 'nullable|numeric|min:0',
-            'width' => 'nullable|numeric|min:0',
-            'height' => 'nullable|numeric|min:0',
-        ]);
-
-        return back()->with('success', 'Informations du véhicule mises à jour.');
+        $data = $request->validated();
+        $chauffeur->vehicule()->update($data);
+        return view('driver.vehicle', compact('chauffeur'));
     }
-
-    public function store() {}
 
     public function messages()
     {
@@ -154,50 +145,13 @@ class ChauffeurController extends Controller
         return view('driver.messages.show', compact('conversation'));
     }
 
-    public function getMessages(Request $request, Conversation $conversation)
-    {
-        $user = Auth::user();
-        $chauffeur = $user->chauffeur;
-
-        if (!$chauffeur || $conversation->chauffeur_id !== $chauffeur->id) {
-            abort(403, 'Accès non autorisé.');
-        }
-
-        $perPage = $request->query('per_page', 20);
-
-        $messages = $conversation->messages()
-            ->with('sender')
-            ->latest()
-            ->paginate($perPage);
-
-        return response()->json([
-            'messages' => $messages->map(function ($message) {
-                return [
-                    'id' => $message->id,
-                    'conversation_id' => $message->conversation_id,
-                    'sender_id' => $message->sender_id,
-                    'sender_name' => $message->sender->prenom ?? $message->sender->name ?? 'Utilisateur',
-                    'content' => $message->content,
-                    'type' => $message->type,
-                    'is_read' => $message->is_read,
-                    'time' => $message->created_at->format('H:i'),
-                ];
-            })->values(),
-            'next_page_url' => $messages->nextPageUrl(),
-            'current_page' => $messages->currentPage(),
-        ]);
-    }
-
     public function sendMessage(Request $request, Conversation $conversation)
     {
         $user = Auth::user();
         $chauffeur = $user->chauffeur;
 
         if (!$chauffeur || $conversation->chauffeur_id !== $chauffeur->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Accès non autorisé.'
-            ], 403);
+           abort(403, 'Accès non autorisé.');
         }
 
         $request->validate([
@@ -220,7 +174,7 @@ class ChauffeurController extends Controller
         try {
             broadcast(new MessageSent($message))->toOthers();
         } catch (\Exception $e) {
-            \Log::warning('Broadcast failed: ' . $e->getMessage());
+            Log::warning('Broadcast failed: ' . $e->getMessage());
         }
 
         return response()->json([
@@ -231,3 +185,4 @@ class ChauffeurController extends Controller
             'time' => $message->created_at->format('H:i'),
         ]);
     }
+}
