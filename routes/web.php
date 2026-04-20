@@ -34,60 +34,58 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'dashboard'])->name('admin.dashboard');
-    Route::post('/conversations/{conversation}/typing', [TypingController::class, 'typing'])->name('conversation.typing');
-    Route::get('/conversations/{conversation}/messages', [MessageController::class, 'getMessages'])->name('conversation.messages');
-
-    // Route::get('/driver/onboarding/pending', [DriverOnboardingController::class, 'pending'])->name('driver.onboarding.pending');
-    // Tracking client (GET positions)
-    Route::get('/tracking/{demande}', [TrackingController::class, 'getPositions'])
-        ->name('tracking.positions');
-    Route::post('/api/send-position', [TrackingController::class, 'store'])
-        ->name('tracking.send_position');
-    Route::get('/tracking/{demande}', [TrackingController::class, 'driverTracking'])
-        ->name('tracking');
-
-
-    Route::get('/driver/dashboard', [ChauffeurController::class, 'dashboard'])->name('driver.dashboard');
-    Route::post('/toggle-availability', [ChauffeurController::class, 'toggleAvailability'])
-        ->name('driver.toggle');
-    Route::get('/available', [ChauffeurController::class, 'index'])->name('driver.available');
-    Route::get('/driver/trips', [ChauffeurController::class, 'trips'])->name('driver.trips');
-    Route::post('/offres/{offre}', [OffreController::class, 'create'])->name('driver.offres.create');
-    Route::prefix('driver')->name('driver.')->group(function () {
-        Route::get('/vehicle', [ChauffeurController::class, 'vehicle'])->name('vehicle');
-        Route::put('/vehicle', [ChauffeurController::class, 'updateVehicle'])->name('vehicle.update');
-        Route::get('/messages', [ChauffeurController::class, 'messages'])->name('messages');
-        Route::get('/messages/{conversation}', [ChauffeurController::class, 'showConversation'])->name('messages.show');
-        Route::post('/messages/{conversation}', [ChauffeurController::class, 'sendMessage'])->name('messages.send');
-
-        Route::post('/offres/{demande}', [OffreController::class, 'store'])->name('driver.offres.store');
-        Route::post('/offres/{offre}', [OffreController::class, 'accepte'])->name('offre.accepte');
-    });
-    Route::get('/dashboard', [ExpediteurController::class, 'dashboard'])->name('client.dashboard');
-    Route::prefix('client')->name('client.')->group(function () {
-
-        Route::get('/requests/suivi-gps', [ExpediteurController::class, 'requestsSuiviGps'])->name('requests.suivi_gps');
-        Route::get('/messages', [ExpediteurController::class, 'messages'])->name('messages');
-        Route::get('/messages/{conversation}', [ExpediteurController::class, 'showConversation'])->name('messages.show');
-        Route::post('/messages/{conversation}', [ExpediteurController::class, 'sendMessage'])->name('messages.send');
-
-        //demandes
-        Route::get('/index', [DemandeController::class, 'index'])->name('index');
-        Route::get('/create', [DemandeController::class, 'create'])->name('create');
-        Route::post('/requests', [DemandeController::class, 'store'])->name('requests.store');
-        Route::get('/requests/{demande}', [DemandeController::class, 'show'])->name('requests.show');
-        Route::put('/requests/{demande}', [DemandeController::class, 'update'])->name('requests.update');
-        Route::delete('/requests/{demande}', [DemandeController::class, 'destroy'])->name('requests.destroy');
-    });
-
-
-    // Routes Client - Demandes
-
-    // Route Profil
+    // gestion profil
     Route::get('/profile', [ExpediteurController::class, 'profile'])->name('profile');
     Route::patch('/profile', [ExpediteurController::class, 'updateProfile'])->name('profile.update');
 
-    // Routes resources Demande (API style)
-    Route::resource('demandes', DemandeController::class)
-        ->only(['index', 'store', 'show', 'update', 'destroy']);
+    // Tracking routes
+    // Tracking client (GET positions)
+    Route::get('/driver/tracking/{demande}', [TrackingController::class, 'getPositions'])->name('driver.tracking');
+    Route::post('/api/tracking/update', [TrackingController::class, 'store'])->name('tracking.update');
+    Route::post('/conversations/{conversation}/typing', [TypingController::class, 'typing'])->name('conversation.typing');
+    Route::get('/conversations/{conversation}/messages', [MessageController::class, 'getMessages'])->name('conversation.messages');
+
+
+    Route::middleware(['role:chauffeur'])->group(function () {
+        //  pages sidbar
+        Route::get('/driver/dashboard', [ChauffeurController::class, 'dashboard'])->name('driver.dashboard');
+        Route::post('/toggle-availability', [ChauffeurController::class, 'toggleAvailability'])
+            ->name('driver.toggle');
+        Route::get('/available', [ChauffeurController::class, 'index'])->name('driver.available');
+        Route::get('/driver/trips', [ChauffeurController::class, 'trips'])->name('driver.trips');
+        // pages create Offre
+        Route::post('/offres/{demades}', [OffreController::class, 'createOffre'])->name('driver.offres.create');
+        Route::post('/driver/offres/{demandes}', [OffreController::class, 'store'])
+            ->name('driver.offres.store');
+        // chat put
+        Route::get('/driver/messages', [ChauffeurController::class, 'messages'])->name('driver.messages');
+        Route::get('/driver/messages/{conversation}', [ChauffeurController::class, 'showConversation'])->name('driver.messages.show');
+        Route::post('/driver/messages/{conversation}', [ChauffeurController::class, 'sendMessage'])->name('driver.messages.send');
+        // pages getion de vehicule
+        Route::get('/driver/vehicle', [ChauffeurController::class, 'vehicle'])->name('driver.vehicle');
+        Route::put('/driver/vehicle', [ChauffeurController::class, 'updateVehicle'])->name('driver.vehicle.update');
+    });
+
+
+
+
+
+    Route::middleware(['role:expediteur'])->group(function () {
+
+        Route::get('/dashboard', [ExpediteurController::class, 'dashboard'])->name('client.dashboard');
+        Route::get('/client/requests/suivi-gps', [ExpediteurController::class, 'requestsSuiviGps'])->name('client.requests.suivi_gps');
+        Route::get('/client/messages', [ExpediteurController::class, 'messages'])->name('client.messages');
+        Route::get('/client/messages/{conversation}', [ExpediteurController::class, 'showConversation'])->name('client.messages.show');
+        Route::post('/client/messages/{conversation}', [ExpediteurController::class, 'sendMessage'])->name('client.messages.send');
+
+        Route::post('/client/offres/{offres}/accepte', [OffreController::class, 'accepte'])->name('client.offre.accepte');
+        Route::post('/client/offres/{offres}/refuse', [OffreController::class, 'refuse'])->name('client.offre.refuse');
+        //demandes
+        Route::get('/index', [DemandeController::class, 'index'])->name('client.index');
+        Route::get('/create', [DemandeController::class, 'create'])->name('client.create');
+        Route::post('/requests', [DemandeController::class, 'store'])->name('client.requests.store');
+        Route::get('/requests/{demande}', [DemandeController::class, 'show'])->name('client.requests.show');
+        Route::put('/requests/{demande}', [DemandeController::class, 'update'])->name('client.requests.update');
+        Route::delete('/requests/{demande}', [DemandeController::class, 'destroy'])->name('client.requests.destroy');
+    });
 });

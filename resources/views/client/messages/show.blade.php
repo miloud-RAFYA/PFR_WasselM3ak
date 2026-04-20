@@ -137,6 +137,20 @@ $(document).ready(function() {
     const charCounter = document.getElementById('char-counter');
     const connectionStatus = document.getElementById('connection-status');
     
+    // Vérifier si le token CSRF existe
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (!csrfToken) {
+        console.error('CSRF token non trouvé!');
+        showNotification('Erreur de sécurité: Token CSRF manquant. Rafraîchissez la page.', 'error');
+    } else {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            dataType: 'json'
+        });
+    }
+
     // Auto-resize textarea
     function autoResizeTextarea() {
         textarea.style.height = 'auto';
@@ -170,23 +184,51 @@ $(document).ready(function() {
     
     // Initialize Pusher
     window.Pusher = Pusher;
-    window.Echo = new Echo({
+    const pusherHost = @json(env('PUSHER_HOST') ?: null);
+    const pusherPort = @json(env('PUSHER_PORT') ?: null);
+    const pusherScheme = @json(env('PUSHER_SCHEME', 'https'));
+    const pusherUseTls = @json(filter_var(env('PUSHER_APP_USE_TLS', true), FILTER_VALIDATE_BOOLEAN));
+
+    const echoOptions = {
         broadcaster: 'pusher',
         key: @json(env('PUSHER_APP_KEY')),
         cluster: @json(env('PUSHER_APP_CLUSTER')),
-        wsHost: @json(env('PUSHER_HOST', '127.0.0.1')),
-        wsPort: @json(env('PUSHER_PORT', 6001)),
-        wssPort: @json(env('PUSHER_PORT', 6001)),
-        forceTLS: @json(filter_var(env('PUSHER_APP_USE_TLS', false), FILTER_VALIDATE_BOOLEAN)),
-        encrypted: @json(filter_var(env('PUSHER_APP_USE_TLS', false), FILTER_VALIDATE_BOOLEAN)),
+        forceTLS: pusherUseTls,
+        encrypted: pusherUseTls,
         enabledTransports: ['ws', 'wss'],
         disableStats: true,
         auth: {
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'X-CSRF-TOKEN': csrfToken,
             },
         },
+    };
+
+    if (pusherHost) {
+        echoOptions.wsHost = pusherHost;
+        echoOptions.wssHost = pusherHost;
+    }
+
+    console.log('Pusher / Echo config:', {
+        key: echoOptions.key,
+        cluster: echoOptions.cluster,
+        wsHost: echoOptions.wsHost || null,
+        wsPort: echoOptions.wsPort || null,
+        scheme: echoOptions.scheme,
+        forceTLS: echoOptions.forceTLS,
+        encrypted: echoOptions.encrypted,
     });
+
+    if (pusherPort) {
+        echoOptions.wsPort = pusherPort;
+        echoOptions.wssPort = pusherPort;
+    }
+
+    if (pusherScheme) {
+        echoOptions.scheme = pusherScheme;
+    }
+
+    window.Echo = new Echo(echoOptions);
     
     // Connection status
     if (window.Echo.connector && window.Echo.connector.pusher) {
@@ -262,9 +304,10 @@ $(document).ready(function() {
         $.ajax({
             url: sendRoute,
             method: 'POST',
+            dataType: 'json',
             data: {
                 content: content,
-                _token: $('meta[name="csrf-token"]').attr('content')
+                _token: csrfToken
             },
             success: function(response) {
                         // Add message to chat immediately (optimistic update)

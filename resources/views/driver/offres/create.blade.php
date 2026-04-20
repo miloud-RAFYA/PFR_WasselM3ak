@@ -33,10 +33,9 @@
                 <p class="mt-3 text-sm text-slate-600">Statut de la demande: <span class="font-medium text-slate-900">{{ ucfirst(str_replace('_', ' ', $demande->status)) }}</span></p>
             </div>
         </div>
-
+  
         <form action="{{ route('driver.offres.store', $demande->id) }}" method="POST" class="space-y-6">
             @csrf
-
             @if ($errors->any())
                 <div class="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
                     <ul class="list-disc list-inside">

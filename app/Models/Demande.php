@@ -27,6 +27,9 @@ class Demande extends Model
     public function offres(){
         return $this->hasMany(Offre::class);
     }
+    public function conversation(){
+        return $this->hasMany(Conversation::class);
+    }
 
     public function acceptedOffre()
     {

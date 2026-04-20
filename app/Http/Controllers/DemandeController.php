@@ -55,8 +55,10 @@ class DemandeController extends Controller
     public function show(Demande $demande)
     {
         $this->authorize('view', $demande);
+        $offres = $demande->offres()->get();
+        // dd($offres);
+        
         $demande = new DemandeResource($demande);
-        $offres = $demande->offres()->where('status','en attente')->get();
         return view('client.requests.show',compact('demande','offres'));
     }
     public function update(UpdateDemandeRequest $request, Demande $demande)

@@ -8,7 +8,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -16,19 +16,29 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        sans: ['Lato', 'sans-serif'],
                     },
                     colors: {
                         primary: {
                             50: '#fef3e2',
                             100: '#fde5c2',
-                            500: '#f97316', // Ton orange
+                            500: '#f97316',
                             600: '#ea580c',
                             700: '#c2410c',
                         },
+                        secondary: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#4cca73',
+                            600: '#33a65e',
+                            700: '#227a47',
+                        },
                         slate: {
-                            900: '#1e293b',
+                            900: '#0f172a',
                         }
+                    },
+                    boxShadow: {
+                        soft: '0 30px 80px rgba(15, 23, 42, 0.08)',
                     }
                 }
             }
@@ -37,10 +47,13 @@
 
     <style>
         [x-cloak] { display: none !important; }
-        .gradient-hero { background: linear-gradient(135deg, #faf8f5 0%, #fff7ed 100%); }
-        .pattern-bg {
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f97316' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
+        body { font-family: 'Lato', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        .btn-primary { display: inline-flex; align-items: center; justify-content: center; border-radius: 9999px; background-color: #027cb1; color: white; padding: 0.95rem 1.7rem; font-weight: 600; box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12); transition: background-color .2s ease; }
+        .btn-primary:hover { background-color: #016692; }
+        .btn-secondary { display: inline-flex; align-items: center; justify-content: center; border-radius: 9999px; border: 1px solid #cbd5e1; background-color: white; color: #0f172a; padding: 0.95rem 1.7rem; font-weight: 600; transition: background-color .2s ease, border-color .2s ease; }
+        .btn-secondary:hover { background-color: #f8fafc; border-color: #f97316; color: #f97316; }
+        .section-card { background-color: white; border: 1px solid rgba(148, 163, 184, 0.16); border-radius: 1.75rem; }
+        .floating-card { background-color: white; border-radius: 1.5rem; box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12); }
     </style>
 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>

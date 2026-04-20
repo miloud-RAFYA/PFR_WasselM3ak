@@ -28,7 +28,7 @@ class TrackingController extends Controller
         } elseif (!$user?->role?->type === 'admin') {
             abort(403);
         }
-
+        // dd($demande->suivres());
         return response()->json(
             $demande->suivres()
                 ->latest('created_at')

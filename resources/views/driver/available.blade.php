@@ -94,22 +94,33 @@
                     $type = strtolower($demande->type_marchendise);
                     if (str_contains($type, 'frais') || str_contains($type, 'alimentaire')) {
                         $imageUrl = asset('images/image.png');
-                    } elseif (str_contains($type, 'électronique') || str_contains($type, 'electronique') || str_contains($type, 'tech')) {
+                    } elseif (
+                        str_contains($type, 'électronique') ||
+                        str_contains($type, 'electronique') ||
+                        str_contains($type, 'tech')
+                    ) {
                         $imageUrl = asset('images/packages.png');
                     } else {
                         $imageUrl = asset('images/packages.png');
                     }
                 @endphp
-                <div class="group overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                <div
+                    class="group overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
                     <div class="relative h-52 overflow-hidden">
-                        <img src="{{ $imageUrl }}" alt="Marchandise {{ $demande->type_marchendise }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/10 to-transparent"></div>
+                        <img src="{{ $imageUrl }}" alt="Marchandise {{ $demande->type_marchendise }}"
+                            class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/10 to-transparent">
+                        </div>
                         <div class="absolute inset-x-0 top-0 flex items-center justify-between px-5 py-4">
-                            <span class="rounded-full bg-primary-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">{{ ucfirst($demande->type_marchendise) }}</span>
-                            <span class="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-800">{{ $demande->poids_kg }} kg</span>
+                            <span
+                                class="rounded-full bg-primary-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">{{ ucfirst($demande->type_marchendise) }}</span>
+                            <span
+                                class="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-800">{{ $demande->poids_kg }}
+                                kg</span>
                         </div>
                         <div class="absolute left-5 bottom-5 text-white">
-                            <h3 class="text-2xl font-semibold tracking-tight">{{ $demande->ville_depart }} → {{ $demande->ville_arrive }}</h3>
+                            <h3 class="text-2xl font-semibold tracking-tight">{{ $demande->ville_depart }} →
+                                {{ $demande->ville_arrive }}</h3>
                             <p class="text-sm text-slate-200/90 mt-1">{{ $demande->created_at->format('d M Y') }}</p>
                         </div>
                     </div>
@@ -120,7 +131,8 @@
                                 <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Référence</p>
                                 <p class="text-lg font-semibold text-slate-900">{{ $demande->reference }}</p>
                             </div>
-                            <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] {{ 'bg-slate-100 text-slate-700' }}">
+                            <span
+                                class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] {{ 'bg-slate-100 text-slate-700' }}">
                                 Nouvelle demande
                             </span>
                         </div>
@@ -146,10 +158,14 @@
                             <p class="uppercase tracking-[0.2em] text-xs text-slate-400">Offres</p>
                             <p class="font-medium">{{ $demande->offres->count() }}</p>
                         </div>
-                        <a href="{{ route('driver.offres.create', $demande->id) }}" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-primary-500 hover:text-white">
-                            Proposer
+                        <form method="POST" action="{{ route('driver.offres.create',$demande->id) }}"
+                            class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-primary-500 hover:text-white">
+                            @csrf
+                            <button type='supmit'>
+                                Proposer
+                            </button>
                             <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </a>
+                        </form>
                     </div>
                 </div>
             @empty

@@ -35,11 +35,10 @@ class ChauffeurController extends Controller
 
         $acceptedOffers = $offres->where('status', 'acceptee');
         $pendingOffers = $offres->where('status', 'en attente');
-
         $monthlyOffers = $acceptedOffers->filter(fn($offre) => $offre->created_at->isCurrentMonth());
 
         $stats = [
-            'courses_ce_mois' => $acceptedOffers->filter(fn($offre) => $offre->created_at->isCurrentMonth()),
+            'courses_ce_mois' => $acceptedOffers->filter(fn($offre) => $offre->created_at->isCurrentMonth())->count(),
             'offres_en_attente' => $pendingOffers->count(),
             'gains_ce_mois' => $monthlyOffers->sum('montant_propose'),
             'revenu_total' => $acceptedOffers->sum('montant_propose'),
