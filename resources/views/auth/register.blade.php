@@ -258,6 +258,12 @@
                                 <button type="button" @click="step = 5"
                                     class="bg-orange-600 px-8 py-3 text-white rounded-lg font-bold shadow-lg shadow-orange-600/20 active:scale-95 transition-all">Finaliser</button>
                             </div>
+                            <div class="mt-6 text-left">
+                                <label class="flex items-center gap-2 text-sm text-slate-600">
+                                    <input type="checkbox" name="terms" value="1" class="accent-orange-500">
+                                    J’accepte les conditions générales
+                                </label>
+                            </div>
                         </div>
 
                         <div x-show="step === 5" class="text-center py-10">

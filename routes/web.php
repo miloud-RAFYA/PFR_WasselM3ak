@@ -5,9 +5,7 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChauffeurController;
 use App\Http\Controllers\DemandeController;
-use App\Http\Controllers\DriverOnboardingController;
 use App\Http\Controllers\ExpediteurController;
-use App\Http\Controllers\ExpediteurDashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OffreController;
 use App\Http\Controllers\TrackingController;
@@ -40,11 +38,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/{users}/documents', [AdminDashboardController::class, 'userDocuments'])->name('admin.users.documents');
     Route::patch('/admin/{users}/documents/verify-all', [AdminDashboardController::class, 'verifyAllUserDocuments'])->name('admin.users.documents.verify-all');
     Route::delete('/admin/{users}/destroy', [AdminDashboardController::class, 'destroy'])->name('admin.users.destroy');
+    Route::patch('/admin/chauffeurs/{chauffeur}/comment', [AdminDashboardController::class, 'addComment'])->name('admin.users.comment');
     Route::get('/admin/statistics', [AdminDashboardController::class, 'statistics'])->name('admin.statistics');
-    Route::get('/admin/driver-documents', [AdminDashboardController::class, 'driverDocuments'])->name('admin.driver-documents');
+    Route::get('/admin/demandes', [AdminDashboardController::class, 'demandes'])->name('admin.demandes');
     Route::patch('/admin/documents/{document}/verify', [AdminDashboardController::class, 'verifyDocument'])->name('admin.documents.verify');
     Route::delete('/admin/documents/{document}/destroy', [AdminDashboardController::class, 'destroyDocument'])->name('admin.documents.destroy');
     Route::post('/admin/documents/{document}/message', [AdminDashboardController::class, 'sendDocumentMessage'])->name('admin.documents.message');
+
     // gestion profil
     Route::get('/profile', [ExpediteurController::class, 'profile'])->name('profile');
     Route::patch('/profile', [ExpediteurController::class, 'updateProfile'])->name('profile.update');

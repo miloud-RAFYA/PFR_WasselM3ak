@@ -64,13 +64,15 @@ class AuthController extends Controller
                     }
                 }
 
+                $user->update(['est_actif', true]);
+
                 $redirectRoute = 'driver.dashboard';
             } elseif ($request->user_type === 'expediteur') {
                 $user->expediteur()->create([
                     'adresse_principale' => $request->adresse_principale,
                     'total_envois' => 0,
                 ]);
-
+                $user->update(['est_actif', true]);
                 $redirectRoute = 'client.dashboard';
             } else {
                 throw new \Exception("Type d'utilisateur non reconnu.");
@@ -78,6 +80,7 @@ class AuthController extends Controller
 
             DB::commit();
             Auth::login($user);
+
 
             return redirect()->route($redirectRoute);
         } catch (\Exception $e) {
@@ -106,6 +109,11 @@ class AuthController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
 
+            // Mise à jour est_actif
+            Auth::user()->update([
+                'est_actif' => true
+            ]);
+
             return match ($user->role->type) {
                 'expediteur' => redirect()->route('client.dashboard'),
                 'chauffeur'  => redirect()->route('driver.dashboard'),
@@ -121,6 +129,9 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        Auth::user()->update([
+            'est_actif' => false
+        ]);
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

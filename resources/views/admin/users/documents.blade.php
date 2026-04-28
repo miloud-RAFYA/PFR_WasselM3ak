@@ -130,8 +130,9 @@
 
                             {{-- VALIDER --}}
                             @if ($document->status !== 'approuve')
-                                <form action="{{ route('admin.documents.verify', $document) }}" method="POST">
+                                <form action="{{ route('admin.documents.verify', $document) }}"  method="POST">
                                     @csrf
+                                     @method('PATCH')
                                     <button type="submit"
                                         class="w-full px-3 py-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-500 hover:text-white transition text-sm">
                                         ✔ Valider
@@ -147,6 +148,7 @@
                             @if ($document->status !== 'rejete')
                                 <form action="{{ route('admin.documents.verify', $document) }}" method="POST">
                                     @csrf
+                                     @method('PATCH')
                                     <input type="hidden" name="reject" value="1">
                                     <button type="submit" onclick="return confirm('Confirmer le rejet ?')"
                                         class="w-full px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-500 hover:text-white transition text-sm">

@@ -13,6 +13,7 @@ class Chauffeur extends Model
         'status',
         'note_moyenne',
         'total_livraisons',
+        'commentaire_admin'
     ];
     
      public function user(){

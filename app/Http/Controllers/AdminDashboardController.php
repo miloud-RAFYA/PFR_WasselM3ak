@@ -47,11 +47,11 @@ class AdminDashboardController extends Controller
 
         // Pourcentages clients vs transporteurs
         $totalClientsDrivers = ($usersByRole['expediteur'] ?? 0) + ($usersByRole['chauffeur'] ?? 0);
-        $stats['clients_percent'] = $totalClientsDrivers > 0 
-            ? round(($usersByRole['expediteur'] ?? 0) / $totalClientsDrivers * 100) 
+        $stats['clients_percent'] = $totalClientsDrivers > 0
+            ? round(($usersByRole['expediteur'] ?? 0) / $totalClientsDrivers * 100)
             : 0;
-        $stats['drivers_percent'] = $totalClientsDrivers > 0 
-            ? round(($usersByRole['chauffeur'] ?? 0) / $totalClientsDrivers * 100) 
+        $stats['drivers_percent'] = $totalClientsDrivers > 0
+            ? round(($usersByRole['chauffeur'] ?? 0) / $totalClientsDrivers * 100)
             : 0;
 
         // Inscriptions par mois (12 derniers mois)
@@ -73,13 +73,13 @@ class AdminDashboardController extends Controller
             $date = now()->subMonths($i);
             $monthKey = $date->format('Y-m');
             $monthLabel = $date->format('M');
-            
+
             $chartLabels[] = $monthLabel;
-            
+
             $found = $monthlyRegistrations->first(function ($item) use ($date) {
                 return $item->month == $date->month && $item->year == $date->year;
             });
-            
+
             $chartData[] = $found ? $found->total : 0;
         }
 
@@ -113,10 +113,9 @@ class AdminDashboardController extends Controller
         if ($request->filled('role')) {
             $query->whereHas('role', function ($q) use ($request) {
                 $q->where('type', $request->role);
-                
-                });
-                // $user1=$query->paginate(22)->withQueryString();
-                // dd($user1);
+            });
+            // $user1=$query->paginate(22)->withQueryString();
+            // dd($user1);
 
         }
 
@@ -144,10 +143,10 @@ class AdminDashboardController extends Controller
     public function makeAdmin($id)
     {
         $user = User::findOrFail($id);
-        
+
         // Find or create admin role
         $adminRole = \App\Models\Role::firstOrCreate(['type' => 'admin']);
-        
+
         $user->update(['role_id' => $adminRole->id]);
         return back()->with('success', 'Utilisateur promu administrateur avec succès.');
     }
@@ -155,34 +154,34 @@ class AdminDashboardController extends Controller
     public function userDocuments($userId)
     {
         $user = User::with('chauffeur.documents')->findOrFail($userId);
-        
+
         if (!$user->isDriver()) {
             return back()->with('error', 'Aucun document pour cet utilisateur.');
-            }
-            
-            $documents = $user->chauffeur->documents()->latest()->get();
+        }
+
+        $documents = $user->chauffeur->documents()->latest()->get();
         //    dd($documents);        // Vérifier que chaque document existe dans le storage
         foreach ($documents as $document) {
             $documentPath = public_path($document->chemin);
             $document->file_exists = file_exists($documentPath);
         }
-        
+
         return view('admin.users.documents', compact('user', 'documents'));
     }
 
     public function verifyAllUserDocuments($userId)
     {
         $user = User::with('chauffeur.documents')->findOrFail($userId);
-        
+
         if (!$user->isDriver() || !$user->chauffeur) {
             return back()->with('error', 'Aucun document pour cet utilisateur.');
         }
-        
+
         $user->chauffeur->documents()->update(['status' => 'approuve']);
         return back()->with('success', 'Tous les documents ont été approuvés.');
     }
 
-    public function destroy( $id)
+    public function destroy($id)
     {
         $user = User::FindOrFail($id);
         // dd($user);
@@ -238,17 +237,6 @@ class AdminDashboardController extends Controller
         // 4. Satisfaction moyenne (Rating)
         // On imagine une table 'reviews' ou une colonne 'rating' dans les courses
         $averageRating = DB::table('evaluations')->avg('note_generale') ?? 4.5;
-        // dd( [
-        //     'clientsCount' => $clientsCount,
-        //     'driversCount' => $driversCount,
-        //     'clientsPercent' => $clientsPercent,
-        //     'driversPercent' => $driversPercent,
-        //     'monthlyData' => $monthlyData,
-        //     'newDemandes' => $newDemandes,
-        //     'completedRides' => $completedRides,
-        //     'totalRevenue' => $totalRevenue,
-        //     'averageRating' => number_format($averageRating, 1),
-        // ]);
         return view('admin.statistics', [
             'clientsCount' => $clientsCount,
             'driversCount' => $driversCount,
@@ -298,6 +286,7 @@ class AdminDashboardController extends Controller
         return back()->with('success', 'Document supprimé.');
     }
 
+
     public function sendDocumentMessage(Request $request, Document $document)
     {
         $request->validate([
@@ -305,7 +294,7 @@ class AdminDashboardController extends Controller
         ]);
 
         $chauffeur = $document->chauffeur;
-        
+
         // Pour l'admin, on utilise l'utilisateur connecté ou par défaut l'admin avec ID 1
         $adminId = Auth::check() ? Auth::id() : 1;
 
@@ -332,5 +321,27 @@ class AdminDashboardController extends Controller
         $document->update(['commentaire_admin' => $request->message]);
 
         return back()->with('success', 'Message envoyé au chauffeur.');
+    }
+    public function demandes()
+    {
+        $demandes = Demande::with('expediteur')
+            ->latest()
+            ->paginate(10);
+
+        return view('admin.demandes', compact('demandes'));
+    }
+
+    public function addComment(Request $request, $id)
+    {
+        $user=User::findOrFail($id);
+        $chauffeur = $user->chauffeur;
+        $request->validate([
+            'commentaire' => 'required|string|max:500'
+        ]);
+        $chauffeur->update([
+            'commentaire_admin' => $request->commentaire
+        ]);
+        dd($chauffeur);
+        return back()->with('success', 'Commentaire envoyé avec succès.');
     }
 }
