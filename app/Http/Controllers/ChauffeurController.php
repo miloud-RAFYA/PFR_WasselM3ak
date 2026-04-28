@@ -72,19 +72,33 @@ class ChauffeurController extends Controller
 
     public function trips()
     {
-        $user = Auth::user();
-        $chauffeur = $user->chauffeur;
+        $chauffeur = Auth::user()->chauffeur;
 
-        if (! $chauffeur) {
+        if (!$chauffeur) {
             return redirect()->route('home')->with('error', 'Accès non autorisé.');
         }
 
-        $courses = Offre::with(['demande.expediteur.user'])
+        // On charge toutes les offres avec les relations nécessaires
+        $allOffres = Offre::with(['demande.expediteur.user'])
             ->where('chauffeur_id', $chauffeur->id)
             ->latest()
             ->get();
 
-        return view('driver.trips.index', compact('courses'));
+        // On sépare en deux collections via la méthode filter() de Laravel (en mémoire)
+        // 1. Les missions où le client a dit "OUI"
+        $acceptedCourses = $allOffres->where('status', 'acceptee');
+
+        // 2. Les offres où on attend encore le client
+        $pendingOffers = $allOffres->where('status', 'en attente');
+
+        // On identifie s'il y a un trajet en cours pour activer le script GPS
+        $activeCourse = $acceptedCourses->first(fn($c) => optional($c->demande)->status === 'in_progress');
+
+        return view('driver.trips.index', compact(
+            'acceptedCourses',
+            'pendingOffers',
+            'activeCourse'
+        ));
     }
 
     public function vehicle()
@@ -150,7 +164,7 @@ class ChauffeurController extends Controller
         $chauffeur = $user->chauffeur;
 
         if (!$chauffeur || $conversation->chauffeur_id !== $chauffeur->id) {
-           abort(403, 'Accès non autorisé.');
+            abort(403, 'Accès non autorisé.');
         }
 
         $request->validate([

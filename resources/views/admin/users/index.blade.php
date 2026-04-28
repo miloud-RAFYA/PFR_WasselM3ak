@@ -3,96 +3,185 @@
 @section('title', 'Gestion des utilisateurs')
 
 @section('sidebar')
-@include('admin.partials.sidebar', ['active' => 'users'])
+    @include('admin.partials.sidebar', ['active' => 'users'])
 @endsection
 
 @section('page-title', 'Gestion des utilisateurs')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Filters -->
-    <div class="flex items-center justify-between">
-        <div class="relative w-96">
+
+<div class="space-y-8">
+
+    {{-- HEADER --}}
+    <div class="flex flex-col lg:flex-row justify-between items-center gap-4">
+
+        {{-- SEARCH --}}
+        <form action="{{ route('admin.users') }}" method="GET" class="relative w-full lg:w-96">
             <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-            <input type="text" placeholder="Rechercher un utilisateur..." class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <input type="text" name="search" value="{{ request('search') }}"
+                placeholder="Rechercher utilisateur..."
+                class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary-500 outline-none shadow-sm">
+        </form>
+
+        {{-- ACTIONS --}}
+        <div class="flex gap-3 w-full lg:w-auto">
+            <button class="flex-1 lg:flex-none px-5 py-3 border rounded-xl bg-white hover:bg-slate-50 shadow-sm flex items-center justify-center gap-2">
+                <i data-lucide="download" class="w-4 h-4"></i> Export
+            </button>
+
+            <button class="flex-1 lg:flex-none px-5 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl shadow-md flex items-center justify-center gap-2">
+                <i data-lucide="user-plus" class="w-4 h-4"></i> Ajouter utilisateur
+            </button>
         </div>
-        <div class="flex gap-2">
-            <button class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">Exporter</button>
-            <button class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors">Ajouter</button>
-        </div>
+
     </div>
 
-    <!-- Tabs -->
-    <div class="bg-white rounded-xl shadow-sm">
-        <div class="border-b border-slate-200">
-            <nav class="flex -mb-px">
-                <a href="#" class="px-6 py-4 border-b-2 border-primary-500 text-primary-600 font-medium">Tous</a>
-                <a href="#" class="px-6 py-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Clients</a>
-                <a href="#" class="px-6 py-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Transporteurs</a>
-                <a href="#" class="px-6 py-4 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">En attente</a>
+    {{-- CARD --}}
+    <div class="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden">
+
+        {{-- TABS --}}
+        <div class="border-b bg-slate-50 px-4">
+            <nav class="flex gap-2 overflow-x-auto">
+                @php
+                    $tabs = [
+                        ['label' => 'Tous', 'role' => null, 'est_verifie' => null],
+                        ['label' => 'Clients', 'role' => 'expediteur', 'est_verifie' => null],
+                        ['label' => 'Transporteurs', 'role' => 'chauffeur', 'est_verifie' => null],
+                        ['label' => 'En attente', 'role' => null, 'est_verifie' => 0],
+                    ];
+                @endphp
+
+                @foreach ($tabs as $tab)
+                    @php
+                        $isActive = request('role') == $tab['role'] && request('est_verifie') == $tab['est_verifie'];
+                        $url = route('admin.users', array_merge(request()->except(['page']), [
+                            'role' => $tab['role'],
+                            'est_verifie' => $tab['est_verifie'],
+                        ]));
+                    @endphp
+
+                    <a href="{{ $url }}"
+                        class="px-5 py-3 text-sm font-semibold whitespace-nowrap rounded-lg transition-all
+                        {{ $isActive
+                            ? 'bg-white shadow text-primary-600'
+                            : 'text-slate-500 hover:bg-white hover:shadow-sm' }}">
+                        {{ $tab['label'] }}
+                    </a>
+                @endforeach
             </nav>
         </div>
 
+        {{-- TABLE --}}
         <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead>
-                    <tr class="border-b border-slate-200">
-                        <th class="text-left py-3 px-6 text-sm font-medium text-slate-500">Utilisateur</th>
-                        <th class="text-left py-3 px-6 text-sm font-medium text-slate-500">Type</th>
-                        <th class="text-left py-3 px-6 text-sm font-medium text-slate-500">Date d'inscription</th>
-                        <th class="text-left py-3 px-6 text-sm font-medium text-slate-500">Statut</th>
-                        <th class="text-left py-3 px-6 text-sm font-medium text-slate-500">Actions</th>
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                    <tr>
+                        <th class="px-6 py-4 text-left">Utilisateur</th>
+                        <th class="px-6 py-4 text-left">Rôle</th>
+                        <th class="px-6 py-4 text-left">Date</th>
+                        <th class="px-6 py-4 text-left">Statut</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach([
-                        ['name' => 'Ahmed Benali', 'email' => 'ahmed@email.com', 'type' => 'client', 'status' => 'active', 'date' => '2024-03-15'],
-                        ['name' => 'Mohamed Alami', 'email' => 'mohamed@email.com', 'type' => 'driver', 'status' => 'pending', 'date' => '2024-03-14'],
-                        ['name' => 'Sofia El Amrani', 'email' => 'sofia@email.com', 'type' => 'client', 'status' => 'active', 'date' => '2024-03-13'],
-                        ['name' => 'Karim Fassi', 'email' => 'karim@email.com', 'type' => 'driver', 'status' => 'suspended', 'date' => '2024-03-12'],
-                    ] as $user)
-                    <tr class="border-b border-slate-100 hover:bg-slate-50">
-                        <td class="py-3 px-6">
+
+                <tbody class="divide-y">
+
+                    @forelse($users as $user)
+                    <tr class="hover:bg-slate-50 transition">
+
+                        {{-- USER --}}
+                        <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-medium {{ $user['type'] === 'driver' ? 'bg-blue-500' : 'bg-green-500' }}">
-                                    {{ substr($user['name'], 0, 1) }}
+                                <div class="w-11 h-11 rounded-full bg-gradient-to-br from-primary-500 to-indigo-500 text-white flex items-center justify-center font-bold shadow">
+                                    {{ strtoupper(substr($user->nom, 0, 1)) }}
                                 </div>
                                 <div>
-                                    <p class="font-medium text-slate-900">{{ $user['name'] }}</p>
-                                    <p class="text-sm text-slate-500">{{ $user['email'] }}</p>
+                                    <p class="font-semibold text-slate-800">{{ $user->nom }}</p>
+                                    <p class="text-xs text-slate-400">{{ $user->email }}</p>
                                 </div>
                             </div>
                         </td>
-                        <td class="py-3 px-6">
-                            <span class="px-2 py-1 text-xs rounded-full border {{ $user['type'] === 'driver' ? 'border-blue-500 text-blue-500' : 'border-green-500 text-green-500' }}">
-                                {{ $user['type'] === 'driver' ? 'Transporteur' : 'Client' }}
+
+                        {{-- ROLE --}}
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 text-xs rounded-full font-semibold
+                                {{ $user->role->type === 'admin'
+                                    ? 'bg-purple-100 text-purple-600'
+                                    : ($user->role->type === 'chauffeur'
+                                        ? 'bg-blue-100 text-blue-600'
+                                        : 'bg-indigo-100 text-indigo-600') }}">
+                                {{ $user->role->type === 'admin' ? 'Admin' : ($user->role->type === 'chauffeur' ? 'Transporteur' : 'Client') }}
                             </span>
                         </td>
-                        <td class="py-3 px-6 text-sm">{{ $user['date'] }}</td>
-                        <td class="py-3 px-6">
-                            <span class="px-2 py-1 text-xs rounded-full 
-                                {{ $user['status'] === 'active' ? 'bg-green-500 text-white' : ($user['status'] === 'pending' ? 'bg-amber-500 text-white' : 'bg-red-500 text-white') }}">
-                                {{ $user['status'] === 'active' ? 'Actif' : ($user['status'] === 'pending' ? 'En attente' : 'Suspendu') }}
+
+                        {{-- DATE --}}
+                        <td class="px-6 py-4 text-slate-500">
+                            {{ $user->created_at->format('d/m/Y') }}
+                        </td>
+
+                        {{-- STATUS --}}
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 text-xs rounded-full font-semibold
+                                {{ $user->est_actif ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600' }}">
+                                {{ $user->est_actif ? 'Actif' : 'Inactif' }}
                             </span>
                         </td>
-                        <td class="py-3 px-6">
-                            <div class="flex gap-2">
-                                <button class="p-2 hover:bg-slate-100 rounded-lg text-green-500">
-                                    <i data-lucide="user-check" class="w-4 h-4"></i>
+
+                        {{-- ACTIONS --}}
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end gap-2">
+
+                                {{-- @if (!$user->est_verifie)
+                                <form action="{{ route('admin.users.verify', $user) }}" method="POST">
+                                    @csrf @method('PATCH')
+                                    <button class="p-2 rounded-lg bg-green-100 hover:bg-green-500 hover:text-white transition" title="Vérifier">
+                                        <i data-lucide="check" class="w-4 h-4"></i>
+                                    </button>
+                                </form>
+                                @endif --}}
+
+                                @if ($user->role->type === 'chauffeur')
+                                <a href="{{ route('admin.users.documents', $user) }}" 
+                                    class="p-2 rounded-lg bg-blue-100 hover:bg-blue-500 hover:text-white transition" 
+                                    title="Voir les documents">
+                                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                                </a>
+                                @endif
+                                <button class="p-2 rounded-lg bg-slate-100 hover:bg-slate-300 transition" title="Modifier">
+                                    <i data-lucide="edit" class="w-4 h-4"></i>
                                 </button>
-                                <button class="p-2 hover:bg-slate-100 rounded-lg text-red-500">
-                                    <i data-lucide="user-x" class="w-4 h-4"></i>
-                                </button>
-                                <button class="p-2 hover:bg-slate-100 rounded-lg text-slate-400">
-                                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
-                                </button>
+                                <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
+                                      onsubmit="return confirm('Confirmer suppression ?')">
+                                    @csrf @method('DELETE')
+                                    <button class="p-2 rounded-lg bg-red-100 hover:bg-red-500 hover:text-white transition" title="Supprimer">
+                                        <i data-lucide="trash" class="w-4 h-4"></i>
+                                    </button>
+                                </form>
+
                             </div>
                         </td>
+
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="5" class="py-20 text-center text-slate-400">
+                            Aucun utilisateur trouvé
+                        </td>
+                    </tr>
+                    @endforelse
+
                 </tbody>
             </table>
         </div>
+
+        {{-- PAGINATION --}}
+        @if ($users->hasPages())
+        <div class="p-4 border-t bg-slate-50">
+            {{ $users->links() }}
+        </div>
+        @endif
+
     </div>
 </div>
+
 @endsection

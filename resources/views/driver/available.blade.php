@@ -158,14 +158,11 @@
                             <p class="uppercase tracking-[0.2em] text-xs text-slate-400">Offres</p>
                             <p class="font-medium">{{ $demande->offres->count() }}</p>
                         </div>
-                        <form method="POST" action="{{ route('driver.offres.create',$demande->id) }}"
+                       <a href="{{ route('driver.offres.create', $demande->id) }}"
                             class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-primary-500 hover:text-white">
-                            @csrf
-                            <button type='supmit'>
                                 Proposer
-                            </button>
                             <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </form>
+                       </a>
                     </div>
                 </div>
             @empty

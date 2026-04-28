@@ -103,4 +103,22 @@ class MessageController extends Controller
             'current_page' => $messages->currentPage(),
         ]);
     }
+   public function destroy(Conversation $conversation)
+{
+    $chauffeur = $conversation->chauffeur;
+    
+    $demande = $conversation->demande;
+
+    $isRefused = $demande->offres()
+        ->where('chauffeur_id', $chauffeur->id)
+        ->where('status', 'acceptee')
+        ->exists();
+    // dd($chauffeur,$demande,$isRefused);
+    if (!$isRefused) {
+        $conversation->delete();
+        return back()->with('success', 'Conversation supprimée car votre offre a été refusée.');
+    }
+
+    return back()->with('error', 'Impossible de supprimer une conversation pour une offre active.');
+}
 }

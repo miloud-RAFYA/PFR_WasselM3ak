@@ -2,24 +2,32 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-10">
             <div class="space-y-6">
-                <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-3xl overflow-hidden bg-primary-500 shadow-soft transition-all hover:bg-primary-600">
-                        <img src="{{ asset('images/image.png') }}" alt="WasselM3ak" class="w-full h-full object-cover" />
+                <a href="{{ route('home') }}" class="flex-shrink-0 flex items-center gap-3 group">
+                    <div class="h-16 w-auto transition-all duration-300 group-hover:scale-105">
+                        {{-- Remplace le nom du fichier par le nom réel de ton image --}}
+                        <img src="{{ asset('images/Gemini_Generated_Image_cxfmz7cxfmz7cxfm-removebg-preview.png') }}"
+                            alt="WasselM3ak Logistics & Freight - Transport au Maroc"
+                            class="h-full w-auto object-contain" />
                     </div>
-                    <div>
-                        <p class="text-xl font-bold tracking-tight text-slate-900">WasselM3ak</p>
-                        <p class="text-sm text-slate-500">Transport de marchandises au Maroc</p>
+                    <div class="flex flex-col">
+                        <h1 class="text-2xl font-extrabold tracking-tighter uppercase">
+                            <span class="text-primary-600">Wassel</span><span class="text-gray-800">m3ak</span>
+                        </h1>
                     </div>
                 </a>
-                <p class="text-sm leading-7 text-slate-600 max-w-sm">La marketplace logistique qui connecte exp�diteurs et transporteurs fiables avec des devis transparents et un suivi clair.</p>
+                <p class="text-sm leading-7 text-slate-600 max-w-sm">La marketplace logistique qui connecte exp�diteurs
+                    et transporteurs fiables avec des devis transparents et un suivi clair.</p>
                 <div class="flex items-center gap-3">
-                    <a href="#" class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-700 shadow-sm hover:bg-primary-500 hover:text-white transition">
+                    <a href="#"
+                        class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-700 shadow-sm hover:bg-primary-500 hover:text-white transition">
                         <i class="fa-brands fa-facebook-f"></i>
                     </a>
-                    <a href="#" class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-700 shadow-sm hover:bg-primary-500 hover:text-white transition">
+                    <a href="#"
+                        class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-700 shadow-sm hover:bg-primary-500 hover:text-white transition">
                         <i class="fa-brands fa-instagram"></i>
                     </a>
-                    <a href="#" class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-700 shadow-sm hover:bg-primary-500 hover:text-white transition">
+                    <a href="#"
+                        class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-700 shadow-sm hover:bg-primary-500 hover:text-white transition">
                         <i class="fa-brands fa-linkedin-in"></i>
                     </a>
                 </div>
@@ -38,7 +46,8 @@
             <div>
                 <h3 class="text-sm font-semibold uppercase tracking-[0.25em] text-slate-500 mb-6">Transporteurs</h3>
                 <ul class="space-y-3 text-sm text-slate-600">
-                    <li><a href="#features-driver" class="hover:text-primary-600 transition">Devenir transporteur</a></li>
+                    <li><a href="#features-driver" class="hover:text-primary-600 transition">Devenir transporteur</a>
+                    </li>
                     <li><a href="#features-driver" class="hover:text-primary-600 transition">Avantages</a></li>
                     <li><a href="#testimonials" class="hover:text-primary-600 transition">T�moignages</a></li>
                     <li><a href="#" class="hover:text-primary-600 transition">Support</a></li>
@@ -50,7 +59,8 @@
                 <div class="space-y-4 text-sm text-slate-600">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-envelope text-primary-500"></i>
-                        <a href="mailto:contact@wasselm3ak.ma" class="hover:text-primary-600 transition">contact@wasselm3ak.ma</a>
+                        <a href="mailto:contact@wasselm3ak.ma"
+                            class="hover:text-primary-600 transition">contact@wasselm3ak.ma</a>
                     </div>
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-phone text-primary-500"></i>
@@ -66,7 +76,8 @@
     </div>
 
     <div class="border-t border-slate-200 bg-slate-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
+        <div
+            class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
             <p>� {{ date('Y') }} WasselM3ak. Tous droits r�serv�s.</p>
             <div class="flex flex-wrap gap-6">
                 <a href="#" class="hover:text-primary-600 transition">CGU</a>

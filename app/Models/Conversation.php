@@ -10,6 +10,7 @@ class Conversation extends Model
     use HasFactory;
 
     protected $fillable = [
+        'id',
         'demande_id',
         'expediteur_id',
         'chauffeur_id',

@@ -6,12 +6,15 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-20">
             <a href="{{ route('home') }}" class="flex-shrink-0 flex items-center gap-3 group">
-                <div class="w-12 h-12 flex items-center justify-center transition-all group-hover:scale-105">
-                    <img src="{{ asset('images/logo-icon-wassel.svg') }}" alt="WasselM3ak Icon" class="h-full w-auto" />
+                <div class="h-16 w-auto transition-all duration-300 group-hover:scale-105">
+                    {{-- Remplace le nom du fichier par le nom réel de ton image --}}
+                    <img src="{{ asset('images/Gemini_Generated_Image_cxfmz7cxfmz7cxfm-removebg-preview.png') }}"
+                        alt="WasselM3ak Logistics & Freight - Transport au Maroc"
+                        class="h-full w-auto object-contain" />
                 </div>
 
                 <div class="flex flex-col">
-                    <h1 class="text-2xl font-extrabold tracking-tighter">
+                    <h1 class="text-2xl font-extrabold tracking-tighter uppercase">
                         <span class="text-primary-600">Wassel</span><span class="text-gray-800">m3ak</span>
                     </h1>
                 </div>

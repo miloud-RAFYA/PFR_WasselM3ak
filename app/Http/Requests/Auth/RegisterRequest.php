@@ -32,7 +32,16 @@ class RegisterRequest extends FormRequest
             'user_type' => 'required|string|in:expediteur,chauffeur',
             'adresse_principale' => 'required_if:user_type,expediteur|nullable|string|max:500',
 
-            
+            // Chauffeur - Véhicule
+            'type_vehicule' => 'required_if:user_type,chauffeur|string|in:moto,camionnette,camion',
+            'immatriculation' => 'required_if:user_type,chauffeur|string|max:20',
+            'capacite_charge_kg' => 'required_if:user_type,chauffeur|numeric|min:0',
+            'capacite_volume_m3' => 'nullable|numeric|min:0',
+
+            // Chauffeur - Documents
+            'doc_permis' => 'required_if:user_type,chauffeur|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'doc_carte_grise' => 'required_if:user_type,chauffeur|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'doc_assurance' => 'required_if:user_type,chauffeur|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ];
     }
     public function messages(): array
@@ -53,12 +62,28 @@ class RegisterRequest extends FormRequest
 
             'adresse_principale.required_if' => 'L\'adresse est obligatoire pour les clients.',
 
+            // Chauffeur - Véhicule
             'type_vehicule.required_if' => 'Le type de véhicule est obligatoire pour les chauffeurs.',
+            'type_vehicule.in' => 'Le type de véhicule sélectionné est invalide.',
             'immatriculation.required_if' => 'L\'immatriculation est obligatoire.',
-            'immatriculation.unique' => 'Cette immatriculation est déjà enregistrée.',
             'capacite_charge_kg.required_if' => 'La capacité de charge est obligatoire.',
             'capacite_charge_kg.numeric' => 'La charge doit être un nombre.',
             'capacite_volume_m3.numeric' => 'Le volume doit être un nombre.',
+
+            // Chauffeur - Documents
+            'doc_permis.required_if' => 'Le permis de conduire est obligatoire.',
+            'doc_permis.file' => 'Le permis doit être un fichier.',
+            'doc_permis.mimes' => 'Le permis doit être au format JPG, PNG ou PDF.',
+            'doc_permis.max' => 'Le permis ne doit pas dépasser 5 Mo.',
+            'doc_carte_grise.required_if' => 'La carte grise est obligatoire.',
+            'doc_carte_grise.file' => 'La carte grise doit être un fichier.',
+            'doc_carte_grise.mimes' => 'La carte grise doit être au format JPG, PNG ou PDF.',
+            'doc_carte_grise.max' => 'La carte grise ne doit pas dépasser 5 Mo.',
+            'doc_assurance.required_if' => 'L\'assurance est obligatoire.',
+            'doc_assurance.file' => 'L\'assurance doit être un fichier.',
+            'doc_assurance.mimes' => 'L\'assurance doit être au format JPG, PNG ou PDF.',
+            'doc_assurance.max' => 'L\'assurance ne doit pas dépasser 5 Mo.',
+
             'terms.required' => 'Vous devez accepter les conditions générales.',
         ];
     }

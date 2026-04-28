@@ -17,6 +17,30 @@ class ExpediteurController extends Controller
     /**
      * Dashboard du client
      */
+    public function requestsSuiviGps(Request $request)
+    {
+        $user = Auth::user();
+        $expediteur = $user->expediteur;
+
+        if (!$expediteur) {
+            return redirect()->route('home')->with('error', 'Accès non autorisé.');
+        }
+
+        $demandes = Demande::where('expediteur_id', $expediteur->id)
+            ->where('status', 'in_progress')
+            ->with(['offres.chauffeur.user', 'suivres'])
+            ->latest()
+            ->paginate(10);
+
+        $selectedDemande = $demandes->first();
+        $selectedDemandeId = $request->query('demande_id');
+
+        if ($selectedDemandeId) {
+            $selectedDemande = $demandes->firstWhere('id', $selectedDemandeId) ?? $selectedDemande;
+        }
+
+        return view('client.requests.suivi-gps', compact('demandes', 'selectedDemande'));
+    }
     public function dashboard()
     {
         $user = Auth::user();
@@ -55,30 +79,6 @@ class ExpediteurController extends Controller
         return view('client.dashboard', compact('expediteur', 'demandes', 'demandesRecentes', 'chauffeursDisponibles', 'stats'));
     }
 
-    public function requestsSuiviGps(Request $request)
-    {
-        $user = Auth::user();
-        $expediteur = $user->expediteur;
-
-        if (!$expediteur) {
-            return redirect()->route('home')->with('error', 'Accès non autorisé.');
-        }
-
-        $demandes = Demande::where('expediteur_id', $expediteur->id)
-            ->where('status', 'in_progress')
-            ->with(['offres.chauffeur.user', 'suivres'])
-            ->latest()
-            ->paginate(10);
-
-        $selectedDemande = $demandes->first();
-        $selectedDemandeId = $request->query('demande_id');
-
-        if ($selectedDemandeId) {
-            $selectedDemande = $demandes->firstWhere('id', $selectedDemandeId) ?? $selectedDemande;
-        }
-
-        return view('client.requests.suivi-gps', compact('demandes', 'selectedDemande'));
-    }
 
     public function messages()
     {

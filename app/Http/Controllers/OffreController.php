@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Notifications\OffreAccepteeNotification;
 use App\Models\Conversation;
 use App\Models\Demande;
@@ -18,7 +19,7 @@ class OffreController extends Controller
         if (! $chauffeur) {
             return redirect()->route('driver.dashboard')->with('error', 'Accès non autorisé.');
         }
- 
+
         $request->validate([
             'montant_propose' => ['required', 'numeric', 'min:0'],
         ]);
@@ -32,8 +33,27 @@ class OffreController extends Controller
 
         return redirect()->route('driver.dashboard')->with('success', 'Offre créée avec succès.');
     }
-    public function refuse($id){
-       $offre = Offre::findOrFail($id);
+    public function update($id)
+    {
+        $offre = Offre::findOrFail($id);
+        return view('driver.offres.update', compact('offre'));
+    }
+    public function edit(Request $request,  $id)
+    {
+        $offre=Offre::findOrFail($id);
+        $demande=$offre->demande;
+        // dd($demande);
+        $request->validate([
+            'montant_propose' => 'required|numeric|min:0',
+        ]);
+        $offre->update([
+            'montant_propose' => $request->montant_propose,
+        ]);
+        return redirect()->route('driver.trips')->with('success', 'Votre offre a été mise à jour !');
+    }
+    public function refuse($id)
+    {
+        $offre = Offre::findOrFail($id);
         $demande = $offre->demande;
 
         if ($demande->status !== 'in_progress') {
@@ -53,18 +73,29 @@ class OffreController extends Controller
             'status' => 'pending',
             'prix_final' => $offre->montant_propose,
         ]);
-        $conversation=$demande->conversation();
-         $message = Message::create([
+        $conversation =  Conversation::firstOrCreate(
+            [
+                'demande_id' => $demande->id,
+                'expediteur_id' => $demande->expediteur_id,
+                'chauffeur_id' => $offre->chauffeur_id,
+            ],
+            [
+                'last_message' => 'Offre refusee — la discussion est créée dans vos messages.',
+            ]
+        );
+
+        $message = Message::create([
             'conversation_id' => $conversation->id,
             'sender_id' => Auth::id(),
             'content' => "Bonjour, j'ai refuse votre offre de {$offre->montant_propose} DH pour la demande {$demande->reference}. Pouvons-nous finaliser les détails ici ?",
             'type' => 'text',
         ]);
-  
+        $conversation->update(['last_message' => $message->content]);
+        return back()->with('success', 'Offre refusee et conversation créée dans vos messages.');
     }
     public function accepte($id)
     {
-        
+
         $offre = Offre::findOrFail($id);
         $demande = $offre->demande;
 
@@ -108,8 +139,9 @@ class OffreController extends Controller
 
         return back()->with('success', 'Offre acceptée et conversation créée dans vos messages.');
     }
-    public function createOffre( $id){
-        $demande=Demande::findOrFail($id);
-        return view('driver.offres.create',compact('demande'));
+    public function createOffre($id)
+    {
+        $demande = Demande::findOrFail($id);
+        return view('driver.offres.create', compact('demande'));
     }
 }

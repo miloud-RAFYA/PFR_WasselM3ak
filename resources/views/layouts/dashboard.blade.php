@@ -1,19 +1,25 @@
 <!DOCTYPE html>
 <html lang="fr" dir="ltr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Tableau de bord') | WasselM3ak</title>
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/lucide@latest" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" crossorigin="anonymous"></script>
+
     <!-- Tailwind Config -->
     <script>
         tailwind.config = {
@@ -52,40 +58,42 @@
             }
         }
     </script>
-    
+
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
+
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    
+
     @stack('styles')
 </head>
+
 <body class="font-sans antialiased text-slate-800 bg-slate-50 h-screen overflow-hidden" x-data="{ sidebarOpen: true }">
-    
+
     <div class="h-screen flex overflow-hidden">
         <!-- Sidebar -->
         @yield('sidebar')
-        
+
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Header -->
             @include('partials.dashboard-header')
-            
+
             <!-- Page Content -->
             <main class="flex-1 p-6 overflow-auto">
                 @yield('content')
             </main>
         </div>
     </div>
-    
+
     <!-- Initialize Lucide Icons -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             lucide.createIcons();
         });
     </script>
-    
+
     @stack('scripts')
 </body>
+
 </html>

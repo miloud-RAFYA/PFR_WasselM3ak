@@ -1,133 +1,154 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Mes courses')
+@section('title', 'Mes Missions')
 
 @section('sidebar')
-@include('driver.partials.sidebar', ['active' => 'trips'])
+    @include('driver.partials.sidebar', ['active' => 'trips'])
 @endsection
 
-@section('page-title', 'Mes courses')
+@section('page-title', 'Tableau de bord chauffeur')
 
 @section('content')
-@php
-    $statusFilter = request('status', 'en_cours');
-    $filteredCourses = $courses->filter(function ($course) use ($statusFilter) {
-        $demandeStatus = optional($course->demande)->status;
+    <div class="space-y-12">
 
-        return match ($statusFilter) {
-            'en_cours' => $demandeStatus === 'in_progress',
-            'terminee' => $demandeStatus === 'delivered',
-            'en_attente' => $course->status === 'en attente',
-            default => true,
-        };
-    });
-@endphp
-
-<div class="space-y-6">
-    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-            <p class="text-sm font-medium uppercase tracking-[0.24em] text-slate-400">Chauffeur</p>
-            <h2 class="text-3xl font-semibold text-slate-900">Mes courses</h2>
-            <p class="mt-2 text-sm text-slate-500">Retrouvez un aperçu clair de vos courses, statuts et actions prioritaires.</p>
-        </div>
-        <div class="flex flex-wrap gap-3">
-            @foreach(['en_cours' => 'En cours', 'en_attente' => 'En attente', 'terminee' => 'Terminées'] as $key => $label)
-                <a href="{{ route('driver.trips', ['status' => $key]) }}"
-                    class="rounded-full px-4 py-2 text-sm font-medium transition {{ $statusFilter === $key ? 'bg-primary-500 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                    {{ $label }}
-                </a>
-            @endforeach
-        </div>
-    </div>
-
-    <div class="grid gap-5">
-        @forelse($filteredCourses as $course)
-            @php
-                $demande = $course->demande;
-                $client = optional(optional($demande)->expediteur)->user;
-                $status = $demande?->status;
-                $statusColor = match ($status) {
-                    'in_progress' => 'blue',
-                    'delivered' => 'green',
-                    default => 'amber',
-                };
-                $statusText = match ($status) {
-                    'in_progress' => 'En cours',
-                    'delivered' => 'Terminée',
-                    default => 'En attente',
-                };
-            @endphp
-
-            <article class="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
-                <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white">
-                    <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                        <div>
-                            <p class="text-sm uppercase tracking-[0.28em] text-slate-300">Course #{{ $course->id }}</p>
-                            <h3 class="text-2xl font-semibold tracking-tight">{{ optional($demande)->ville_depart }} → {{ optional($demande)->ville_arrive }}</h3>
-                        </div>
-                        <div class="inline-flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-sm text-slate-100">
-                            <i data-lucide="truck" class="w-4 h-4"></i>
-                            <span>{{ $statusText }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-6 space-y-5">
-                    <div class="grid gap-4 md:grid-cols-3">
-                        <div class="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                            <p class="text-xs uppercase tracking-[0.24em] text-slate-500">Client</p>
-                            <p class="mt-2 font-semibold text-slate-900">{{ optional($client)->prenom ?? 'Client' }} {{ optional($client)->nom ?? '' }}</p>
-                            <p class="mt-1 text-sm text-slate-500">{{ optional($client)->telephone ?? 'Téléphone indisponible' }}</p>
-                        </div>
-                        <div class="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                            <p class="text-xs uppercase tracking-[0.24em] text-slate-500">Marchandise</p>
-                            <p class="mt-2 font-semibold text-slate-900">{{ optional($demande)->type_marchendise ?? 'Non précisé' }}</p>
-                            <p class="mt-1 text-sm text-slate-500">{{ optional($demande)->poids_kg ?? '—' }} kg</p>
-                        </div>
-                        <div class="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                            <p class="text-xs uppercase tracking-[0.24em] text-slate-500">Montant</p>
-                            <p class="mt-2 text-2xl font-semibold text-slate-900">{{ $course->montant_propose }} DH</p>
-                            <p class="mt-1 text-sm text-slate-500">Offre {{ ucfirst($course->status) }}</p>
-                        </div>
-                    </div>
-
-                    <div class="grid gap-3 md:grid-cols-2">
-                        <div class="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                            <p class="text-xs uppercase tracking-[0.24em] text-slate-500">Date de création</p>
-                            <p class="mt-2 font-semibold text-slate-900">{{ optional($demande)->created_at?->format('d F Y') ?? '–' }}</p>
-                        </div>
-                        <div class="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                            <p class="text-xs uppercase tracking-[0.24em] text-slate-500">Référence demande</p>
-                            <p class="mt-2 font-semibold text-slate-900">{{ optional($demande)->reference ?? 'N/A' }}</p>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center gap-2 rounded-full bg-{{ $statusColor }}-100 px-3 py-1 text-sm font-medium text-{{ $statusColor }}-700">
-                                <i data-lucide="circle" class="w-2 h-2"></i> {{ $statusText }}
-                            </span>
-                            <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-600">{{ optional($demande)->ville_depart }} → {{ optional($demande)->ville_arrive }}</span>
-                        </div>
-                        <div class="flex flex-wrap gap-2">
-                            @if($status === 'in_progress' && $demande)
-                                <a href="{{ route('driver.tracking', $demande) }}" class="inline-flex items-center justify-center rounded-2xl bg-primary-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-600">Accéder au suivi</a>
-                            @elseif($status === 'delivered')
-                                <span class="inline-flex items-center justify-center rounded-2xl bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700">Livré</span>
-                            @else
-                                <span class="inline-flex items-center justify-center rounded-2xl bg-amber-100 px-4 py-2 text-sm font-semibold text-amber-800">En attente</span>
-                            @endif
-                            <a href="{{ route('driver.offres.create', optional($demande)->id) }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-primary-500 hover:text-primary-600">Modifier l’offre</a>
-                        </div>
-                    </div>
-                </div>
-            </article>
-        @empty
-            <div class="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center">
-                <p class="text-lg font-medium text-slate-800">Aucune course trouvée pour ce statut.</p>
-                <p class="mt-2 text-sm text-slate-500">Explorez d'autres statuts ou consultez votre tableau de bord pour plus d'informations.</p>
+        {{-- SECTION 1 : MISSIONS ACCEPTÉES --}}
+        <section>
+            <div class="flex items-center gap-3 mb-6">
+                <div class="h-8 w-1.5 bg-emerald-500 rounded-full"></div>
+                <h2 class="text-2xl font-bold text-slate-900">Missions Validées</h2>
+                <span
+                    class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full border border-emerald-200">
+                    {{ $acceptedCourses->count() }} Contrats actifs
+                </span>
             </div>
-        @endforelse
+
+            <div class="grid gap-6">
+                @forelse($acceptedCourses as $course)
+                    <div
+                        class="relative overflow-hidden bg-white border border-slate-200 rounded-3xl shadow-sm transition hover:shadow-md">
+                        {{-- Indicateur visuel dynamique --}}
+                        <div
+                            class="absolute left-0 top-0 bottom-0 w-2 {{ $course->demande->status === 'delivered' ? 'bg-slate-300' : 'bg-primary-500' }}">
+                        </div>
+
+                        <div class="p-6 ml-2">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div class="space-y-1">
+                                    <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                        {{ $course->demande->ville_depart }}
+                                        <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400"></i>
+                                        {{ $course->demande->ville_arrive }}
+                                    </h3>
+                                    <p class="text-sm text-slate-500">
+                                        <span class="font-medium text-slate-700">Client :</span>
+                                        {{ $course->demande->expediteur->user->prenom }}
+                                        {{ $course->demande->expediteur->user->nom }}
+                                    </p>
+                                </div>
+
+                                <div class="flex items-center gap-6">
+                                    <div class="text-right">
+                                        <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Prix Convenu
+                                        </p>
+                                        <p class="text-2xl font-black text-slate-900">
+                                            {{ number_format($course->montant_propose, 0, '.', ' ') }} DH</p>
+                                    </div>
+
+                                    {{-- Bouton Suivi (Modifié pour pointer vers la VUE et non l'action update) --}}
+                                    @if ($course->demande->status === 'in_progress')
+                                        <a href="{{ route('tracking.positions', $course->demande) }}"
+                                            class="inline-flex items-center gap-2 bg-primary-600 text-white px-5 py-3 rounded-2xl font-bold hover:bg-primary-700 transition shadow-lg shadow-primary-200">
+                                            <i data-lucide="map-pin" class="w-4 h-4"></i> Suivi Live
+                                        </a>
+                                    @elseif($course->demande->status === 'delivered')
+                                        <div
+                                            class="flex items-center gap-2 bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold border border-slate-200">
+                                            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i> Terminée
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div
+                        class="text-center py-12 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 text-slate-400">
+                        <i data-lucide="truck" class="w-10 h-10 mx-auto mb-3 opacity-20"></i>
+                        <p>Vous n'avez pas encore de mission acceptée.</p>
+                    </div>
+                @endforelse
+            </div>
+        </section>
+
+        {{-- SECTION 2 : OFFRES EN ATTENTE --}}
+        <section>
+            <div class="flex items-center gap-3 mb-6">
+                <div class="h-8 w-1.5 bg-amber-400 rounded-full"></div>
+                <h2 class="text-2xl font-bold text-slate-900">Mes Propositions</h2>
+                <span
+                    class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full border border-amber-200">En
+                    attente client</span>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+                @forelse($pendingOffers as $offer)
+                    <div
+                        class="bg-slate-50 border border-slate-200 rounded-2xl p-5 hover:bg-white hover:border-primary-300 transition-all group shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <div class="space-y-1">
+                                <p class="text-sm font-bold text-slate-900">{{ $offer->demande->ville_depart }} →
+                                    {{ $offer->demande->ville_arrive }}</p>
+                                <p class="text-xs text-slate-500 flex items-center gap-1">
+                                    <i data-lucide="package" class="w-3 h-3"></i> {{ $offer->demande->type_marchendise }}
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-primary-600">
+                                    {{ number_format($offer->montant_propose, 0, '.', ' ') }} DH</p>
+                                <a href="{{ route('driver.offres.update', $offer->id) }}"
+                                    class="inline-flex items-center gap-1 text-[10px] uppercase font-bold text-slate-400 group-hover:text-primary-500 underline transition">
+                                    <i data-lucide="pencil-line" class="w-3 h-3"></i> Modifier
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div
+                        class="md:col-span-2 text-center py-8 text-slate-400 text-sm italic border border-slate-100 rounded-2xl">
+                        Aucune offre envoyée récemment.
+                    </div>
+                @endforelse
+            </div>
+        </section>
     </div>
-</div>
 @endsection
+
+@push('scripts')
+    <script>
+        @if ($activeCourse)
+            const currentDemandeId = {{ $activeCourse->demande->id }};
+            if ("geolocation" in navigator) {
+                setInterval(() => {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            axios.post("{{ route('tracking.update') }}", {
+                                    demande_id: currentDemandeId,
+                                    latitude: position.coords.latitude,
+                                    longitude: position.coords.longitude
+                                })
+                                .then(res => console.log("Position mise à jour"))
+                                .catch(err => console.error("Erreur d'envoi", err));
+                        },
+                        (error) => {
+                            console.warn("Erreur GPS (" + error.code + "): " + error.message);
+                        }, {
+                            enableHighAccuracy: false, // OBLIGATOIRE sur PC pour éviter le Timeout
+                            timeout: 10000, // 10 secondes d'attente max
+                            maximumAge: 0
+                        }
+                    );
+                }, 15000); // Envoi toutes les 15 secondes
+            }
+        @endif
+    </script>
+@endpush

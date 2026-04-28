@@ -52,12 +52,12 @@ class AuthController extends Controller
                     'capacite_volume_m3' => $request->capacite_volume_m3 ?? 0,
                 ]);
                 //   var_dump($vehicule);
-                foreach (['permis_conduire', 'carte_grise', 'assurance'] as $doc) {
+                foreach (['doc_permis', 'doc_carte_grise', 'doc_assurance'] as $doc) {
                     if ($request->hasFile($doc)) {
                         $docPath = $request->file($doc)->store('documents', 'public');
                         //  var_dump($docPath);
-                        $doc = $chauffeur->documents()->create([
-                            'type' => $doc,
+                        $document = $chauffeur->documents()->create([
+                            'type' => str_replace('doc_', '', $doc), // 'permis', 'carte_grise', 'assurance'
                             'chemin' => $docPath,
                             'status' => 'en_attente',
                         ]);

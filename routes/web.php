@@ -34,15 +34,28 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin/user', [AdminDashboardController::class, 'users'])->name('admin.users');
+    Route::patch('/admin/{users}/verify', [AdminDashboardController::class, 'verify'])->name('admin.users.verify');
+    Route::patch('/admin/{users}/make-admin', [AdminDashboardController::class, 'makeAdmin'])->name('admin.users.make-admin');
+    Route::get('/admin/{users}/documents', [AdminDashboardController::class, 'userDocuments'])->name('admin.users.documents');
+    Route::patch('/admin/{users}/documents/verify-all', [AdminDashboardController::class, 'verifyAllUserDocuments'])->name('admin.users.documents.verify-all');
+    Route::delete('/admin/{users}/destroy', [AdminDashboardController::class, 'destroy'])->name('admin.users.destroy');
+    Route::get('/admin/statistics', [AdminDashboardController::class, 'statistics'])->name('admin.statistics');
+    Route::get('/admin/driver-documents', [AdminDashboardController::class, 'driverDocuments'])->name('admin.driver-documents');
+    Route::patch('/admin/documents/{document}/verify', [AdminDashboardController::class, 'verifyDocument'])->name('admin.documents.verify');
+    Route::delete('/admin/documents/{document}/destroy', [AdminDashboardController::class, 'destroyDocument'])->name('admin.documents.destroy');
+    Route::post('/admin/documents/{document}/message', [AdminDashboardController::class, 'sendDocumentMessage'])->name('admin.documents.message');
     // gestion profil
     Route::get('/profile', [ExpediteurController::class, 'profile'])->name('profile');
     Route::patch('/profile', [ExpediteurController::class, 'updateProfile'])->name('profile.update');
 
     // Tracking routes
     // Tracking client (GET positions)
-    Route::get('/driver/tracking/{demande}', [TrackingController::class, 'getPositions'])->name('driver.tracking');
-    Route::post('/api/tracking/update', [TrackingController::class, 'store'])->name('tracking.update');
+    Route::get('/tracking/{demande}/positions', [TrackingController::class, 'getPositions'])
+        ->name('tracking.positions');
+    Route::post('/tracking/update', [TrackingController::class, 'store'])->name('tracking.update');
     Route::post('/conversations/{conversation}/typing', [TypingController::class, 'typing'])->name('conversation.typing');
+    Route::delete('/messages/{conversation}', [MessageController::class, 'destroy'])->name('client.messages.destroy');
     Route::get('/conversations/{conversation}/messages', [MessageController::class, 'getMessages'])->name('conversation.messages');
 
 
@@ -54,7 +67,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/available', [ChauffeurController::class, 'index'])->name('driver.available');
         Route::get('/driver/trips', [ChauffeurController::class, 'trips'])->name('driver.trips');
         // pages create Offre
-        Route::post('/offres/{demades}', [OffreController::class, 'createOffre'])->name('driver.offres.create');
+        Route::get('/offres/{demades}/create', [OffreController::class, 'createOffre'])->name('driver.offres.create');
+        Route::put('/offres/{offres}/edit', [OffreController::class, 'edit'])->name('driver.offres.edit');
+        Route::get('/offres/{offres}/update', [OffreController::class, 'update'])->name('driver.offres.update');
         Route::post('/driver/offres/{demandes}', [OffreController::class, 'store'])
             ->name('driver.offres.store');
         // chat put

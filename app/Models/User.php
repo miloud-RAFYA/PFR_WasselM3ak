@@ -76,19 +76,26 @@ class User extends Authenticatable
     {
         return $this->hasOne(Expediteur::class);
     }
-
-    public function isAdmin(): bool
+    public function isAdmin()
     {
-        return $this->role?->type === 'admin';
+        return $this->role->type === 'admin';
     }
 
-    public function isDriver(): bool
+    public function isClient()
     {
-        return $this->role?->type === 'chauffeur';
+        return $this->role->type === 'expediteur';
     }
 
-    public function isClient(): bool
+    public function isDriver()
     {
-        return $this->role?->type === 'expediteur';
+        return $this->role->type === 'chauffeur';
+    }
+
+    public function documents()
+    {
+        if ($this->isDriver() && $this->chauffeur) {
+            return $this->chauffeur->documents();
+        }
+        return collect();
     }
 }
