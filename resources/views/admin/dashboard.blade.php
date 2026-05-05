@@ -101,13 +101,13 @@
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-orange-500"></div>
                             <span class="text-sm text-slate-600">Transporteurs</span>
                         </div>
                         <span class="text-sm font-medium text-slate-900">{{ $stats['drivers_percent'] }}%</span>
                     </div>
                     <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div class="h-full bg-blue-500 rounded-full transition-all duration-500" 
+                        <div class="h-full bg-orange-500 rounded-full transition-all duration-500" 
                              style="width: {{ $stats['drivers_percent'] }}%"></div>
                     </div>
                     <p class="text-xs text-slate-400 mt-1">{{ number_format($usersByRole['chauffeur'] ?? 0) }} utilisateurs</p>
@@ -141,7 +141,7 @@
                         <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-medium 
-                                    {{ $user->role?->type === 'chauffeur' ? 'bg-blue-500' : 'bg-green-500' }}">
+                                    {{ $user->role?->type === 'chauffeur' ? 'bg-orange-500' : 'bg-green-500' }}">
                                     {{ strtoupper(substr($user->nom, 0, 1)) }}
                                 </div>
                                 <div>
@@ -183,7 +183,7 @@
                                 @endif
                                 <span class="px-2 py-1 text-xs rounded-full 
                                     {{ $demande->status === 'delivered' ? 'bg-green-100 text-green-700' : 
-                                       ($demande->status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700') }}">
+                                       ($demande->status === 'in_progress' ? 'bg-orange-100 text-orange-700' : 'bg-amber-100 text-amber-700') }}">
                                     {{ match($demande->status) {
                                         'delivered' => 'Terminée',
                                         'in_progress' => 'En cours',

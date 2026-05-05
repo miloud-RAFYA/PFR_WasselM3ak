@@ -90,11 +90,4 @@ class User extends Authenticatable
         return $this->role->type === 'chauffeur';
     }
 
-    public function documents()
-    {
-        if ($this->isDriver() && $this->chauffeur) {
-            return $this->chauffeur->documents();
-        }
-        return collect();
-    }
 }

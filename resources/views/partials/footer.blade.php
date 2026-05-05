@@ -1,88 +1,92 @@
+{{-- partials/footer.blade.php --}}
 <footer class="bg-slate-50 text-slate-700 border-t border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-10">
-            <div class="space-y-6">
-                <a href="{{ route('home') }}" class="flex-shrink-0 flex items-center gap-3 group">
-                    <div class="h-16 w-auto transition-all duration-300 group-hover:scale-105">
-                        {{-- Remplace le nom du fichier par le nom réel de ton image --}}
-                        <img src="{{ asset('images/Gemini_Generated_Image_cxfmz7cxfmz7cxfm-removebg-preview.png') }}"
-                            alt="WasselM3ak Logistics & Freight - Transport au Maroc"
-                            class="h-full w-auto object-contain" />
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
+            <!-- Brand Column -->
+            <div class="space-y-4 sm:space-y-6 text-center sm:text-left">
+                <a href="{{ route('home') }}" class="inline-flex items-center justify-center sm:justify-start gap-2 sm:gap-3 group">
+                    <div class="h-12 w-12 sm:h-14 sm:w-14 transition-all duration-300 group-hover:scale-105">
+                        <img src="{{ asset('images/Gemini_Generated_Image_cxfmz7cxfmz7cxfm-removebg-preview.png') }}" 
+                             alt="WasselM3ak"
+                             class="w-full h-full object-contain" />
                     </div>
                     <div class="flex flex-col">
-                        <h1 class="text-2xl font-extrabold tracking-tighter uppercase">
-                            <span class="text-primary-600">Wassel</span><span class="text-gray-800">m3ak</span>
+                        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tighter uppercase">
+                            <span class="text-primary-500">Wassel</span><span class="text-gray-800">m3ak</span>
                         </h1>
                     </div>
                 </a>
-                <p class="text-sm leading-7 text-slate-600 max-w-sm">La marketplace logistique qui connecte exp�diteurs
-                    et transporteurs fiables avec des devis transparents et un suivi clair.</p>
-                <div class="flex items-center gap-3">
-                    <a href="#"
-                        class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-700 shadow-sm hover:bg-primary-500 hover:text-white transition">
-                        <i class="fa-brands fa-facebook-f"></i>
+                <p class="text-xs sm:text-sm leading-6 sm:leading-7 text-slate-600 max-w-sm mx-auto sm:mx-0">
+                    La marketplace logistique qui connecte expéditeurs et transporteurs fiables avec des devis transparents et un suivi clair.
+                </p>
+                <div class="flex items-center justify-center sm:justify-start gap-2 sm:gap-3">
+                    <a href="#" class="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-lg sm:rounded-xl flex items-center justify-center text-slate-700 shadow-sm hover:bg-primary-500 hover:text-white transition active:scale-95">
+                        <i class="fa-brands fa-facebook-f text-sm sm:text-base"></i>
                     </a>
-                    <a href="#"
-                        class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-700 shadow-sm hover:bg-primary-500 hover:text-white transition">
-                        <i class="fa-brands fa-instagram"></i>
+                    <a href="#" class="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-lg sm:rounded-xl flex items-center justify-center text-slate-700 shadow-sm hover:bg-primary-500 hover:text-white transition active:scale-95">
+                        <i class="fa-brands fa-instagram text-sm sm:text-base"></i>
                     </a>
-                    <a href="#"
-                        class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-700 shadow-sm hover:bg-primary-500 hover:text-white transition">
-                        <i class="fa-brands fa-linkedin-in"></i>
+                    <a href="#" class="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-lg sm:rounded-xl flex items-center justify-center text-slate-700 shadow-sm hover:bg-primary-500 hover:text-white transition active:scale-95">
+                        <i class="fa-brands fa-linkedin-in text-sm sm:text-base"></i>
+                    </a>
+                    <a href="#" class="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-lg sm:rounded-xl flex items-center justify-center text-slate-700 shadow-sm hover:bg-primary-500 hover:text-white transition active:scale-95">
+                        <i class="fa-brands fa-x-twitter text-sm sm:text-base"></i>
                     </a>
                 </div>
             </div>
-
-            <div>
-                <h3 class="text-sm font-semibold uppercase tracking-[0.25em] text-slate-500 mb-6">Exp�diteurs</h3>
-                <ul class="space-y-3 text-sm text-slate-600">
-                    <li><a href="#how-it-works" class="hover:text-primary-600 transition">Comment �a marche</a></li>
-                    <li><a href="#object-types" class="hover:text-primary-600 transition">Types d'envois</a></li>
-                    <li><a href="#faq" class="hover:text-primary-600 transition">FAQ</a></li>
-                    <li><a href="#testimonials" class="hover:text-primary-600 transition">Avis clients</a></li>
+            
+            <!-- Expéditeurs Column -->
+            <div class="text-center sm:text-left">
+                <h3 class="text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-primary-500 mb-4 sm:mb-6">Expéditeurs</h3>
+                <ul class="space-y-2 sm:space-y-3 text-xs sm:text-sm text-slate-600">
+                    <li><a href="#how-it-works" class="hover:text-primary-500 transition">Comment ça marche</a></li>
+                    <li><a href="#object-types" class="hover:text-primary-500 transition">Types d'envois</a></li>
+                    <li><a href="#faq" class="hover:text-primary-500 transition">FAQ</a></li>
+                    <li><a href="#testimonials" class="hover:text-primary-500 transition">Avis clients</a></li>
                 </ul>
             </div>
-
-            <div>
-                <h3 class="text-sm font-semibold uppercase tracking-[0.25em] text-slate-500 mb-6">Transporteurs</h3>
-                <ul class="space-y-3 text-sm text-slate-600">
-                    <li><a href="#features-driver" class="hover:text-primary-600 transition">Devenir transporteur</a>
-                    </li>
-                    <li><a href="#features-driver" class="hover:text-primary-600 transition">Avantages</a></li>
-                    <li><a href="#testimonials" class="hover:text-primary-600 transition">T�moignages</a></li>
-                    <li><a href="#" class="hover:text-primary-600 transition">Support</a></li>
+            
+            <!-- Transporteurs Column -->
+            <div class="text-center sm:text-left">
+                <h3 class="text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-primary-500 mb-4 sm:mb-6">Transporteurs</h3>
+                <ul class="space-y-2 sm:space-y-3 text-xs sm:text-sm text-slate-600">
+                    <li><a href="#features-driver" class="hover:text-primary-500 transition">Devenir transporteur</a></li>
+                    <li><a href="#features-driver" class="hover:text-primary-500 transition">Avantages</a></li>
+                    <li><a href="#testimonials" class="hover:text-primary-500 transition">Témoignages</a></li>
+                    <li><a href="#" class="hover:text-primary-500 transition">Support</a></li>
                 </ul>
             </div>
-
-            <div>
-                <h3 class="text-sm font-semibold uppercase tracking-[0.25em] text-slate-500 mb-6">Contact</h3>
-                <div class="space-y-4 text-sm text-slate-600">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-envelope text-primary-500"></i>
-                        <a href="mailto:contact@wasselm3ak.ma"
-                            class="hover:text-primary-600 transition">contact@wasselm3ak.ma</a>
+            
+            <!-- Contact Column -->
+            <div class="text-center sm:text-left">
+                <h3 class="text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] text-primary-500 mb-4 sm:mb-6">Contact</h3>
+                <div class="space-y-3 sm:space-y-4 text-xs sm:text-sm text-slate-600">
+                    <div class="flex items-center justify-center sm:justify-start gap-2 sm:gap-3">
+                        <i class="fa-solid fa-envelope text-primary-500 text-sm sm:text-base"></i>
+                        <a href="mailto:contact@wasselm3ak.ma" class="hover:text-primary-500 transition break-all">contact@wasselm3ak.ma</a>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-phone text-primary-500"></i>
-                        <a href="tel:+212522123456" class="hover:text-primary-600 transition">+212 524 000 000</a>
+                    <div class="flex items-center justify-center sm:justify-start gap-2 sm:gap-3">
+                        <i class="fa-solid fa-phone text-primary-500 text-sm sm:text-base"></i>
+                        <a href="tel:+212522123456" class="hover:text-primary-500 transition">+212 524 000 000</a>
                     </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fa-solid fa-map-pin text-primary-500 mt-1 shrink-0"></i>
-                        <p>Quartier Industriel, Marrakech, Maroc</p>
+                    <div class="flex items-start justify-center sm:justify-start gap-2 sm:gap-3">
+                        <i class="fa-solid fa-map-pin text-primary-500 mt-0.5 sm:mt-1 shrink-0 text-sm sm:text-base"></i>
+                        <p class="text-xs sm:text-sm">Quartier Industriel, Marrakech, Maroc</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="border-t border-slate-200 bg-slate-50">
-        <div
-            class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
-            <p>� {{ date('Y') }} WasselM3ak. Tous droits r�serv�s.</p>
-            <div class="flex flex-wrap gap-6">
-                <a href="#" class="hover:text-primary-600 transition">CGU</a>
-                <a href="#" class="hover:text-primary-600 transition">Confidentialit�</a>
-                <a href="#" class="hover:text-primary-600 transition">Cookies</a>
+    
+    <!-- Bottom Bar -->
+    <div class="border-t border-slate-200 bg-slate-50 safe-bottom">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm text-slate-500">
+            <p class="text-center sm:text-left">© {{ date('Y') }} WasselM3ak. Tous droits réservés.</p>
+            <div class="flex flex-wrap justify-center gap-4 sm:gap-6">
+                <a href="#" class="hover:text-primary-500 transition">CGU</a>
+                <a href="#" class="hover:text-primary-500 transition">Confidentialité</a>
+                <a href="#" class="hover:text-primary-500 transition">Cookies</a>
+                <a href="#" class="hover:text-primary-500 transition">Mentions légales</a>
             </div>
         </div>
     </div>

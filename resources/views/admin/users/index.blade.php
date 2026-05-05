@@ -96,7 +96,7 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         <div
-                                            class="w-11 h-11 rounded-full bg-gradient-to-br from-primary-500 to-indigo-500 text-white flex items-center justify-center font-bold shadow">
+                                            class="w-11 h-11 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 text-white flex items-center justify-center font-bold shadow">
                                             {{ strtoupper(substr($user->nom, 0, 1)) }}
                                         </div>
                                         <div>
@@ -113,7 +113,7 @@
                                 {{ $user->role->type === 'admin'
                                     ? 'bg-purple-100 text-purple-600'
                                     : ($user->role->type === 'chauffeur'
-                                        ? 'bg-blue-100 text-blue-600'
+                                        ? 'bg-orange-100 text-orange-600'
                                         : 'bg-indigo-100 text-indigo-600') }}">
                                         {{ $user->role->type === 'admin' ? 'Admin' : ($user->role->type === 'chauffeur' ? 'Transporteur' : 'Client') }}
                                     </span>
@@ -154,7 +154,7 @@
 
                                         @if ($user->role->type === 'chauffeur')
                                             <a href="{{ route('admin.users.documents', $user) }}"
-                                                class="p-2 rounded-lg bg-blue-100 hover:bg-blue-500 hover:text-white transition"
+                                                class="p-2 rounded-lg bg-orange-100 hover:bg-orange-500 hover:text-white transition"
                                                 title="Voir les documents">
                                                 <i data-lucide="file-text" class="w-4 h-4"></i>
                                             </a>

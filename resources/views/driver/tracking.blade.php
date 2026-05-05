@@ -25,7 +25,7 @@
         <div class="p-6">
             <div class="rounded-2xl bg-slate-50 border border-slate-200 p-6">
                 <p class="text-slate-700">Ouvrez cette page depuis le navigateur de votre mobile et laissez-la ouverte pendant la livraison.</p>
-                <p class="text-sm text-slate-500 mt-3">Votre position sera envoyée à l’application client pour mise à jour du suivi.</p>
+                <p class="text-sm text-slate-500 mt-3">Votre position sera envoyée à l'application client pour mise à jour du suivi.</p>
                 <p id="tracking-status" class="text-sm mt-4 text-amber-600">Activation du GPS en cours...</p>
             </div>
         </div>
@@ -70,7 +70,7 @@ function stopTracking(reason) {
 }
 
 function sendPosition(coords) {
-    fetch('/api/send-position', {
+    fetch('/tracking/update', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -81,13 +81,23 @@ function sendPosition(coords) {
             longitude: coords.longitude,
             demande_id: demandeId,
         }),
-    }).then(response => {
+    })
+    .then(response => {
         if (!response.ok) {
-            throw new Error('Erreur serveur');
+            throw new Error(`Erreur serveur: ${response.status}`);
         }
-        updateStatus('Position envoyée : ' + new Date().toLocaleTimeString());
-    }).catch(() => {
-        updateStatus('Impossible d’envoyer la position.', true);
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            updateStatus('Position envoyée : ' + new Date().toLocaleTimeString());
+        } else {
+            throw new Error(data.error || 'Erreur inconnue');
+        }
+    })
+    .catch((error) => {
+        console.error('Erreur d\'envoi:', error.message);
+        updateStatus('❌ ' + error.message, true);
     });
 }
 
@@ -113,12 +123,13 @@ function handleError(error) {
     let message = error.message;
 
     if (error.code === error.PERMISSION_DENIED) {
-        message = 'Permission de localisation refusée.';
+        message = 'Permission de localisation refusée. Vérifiez les paramètres de votre appareil.';
     } else if (error.code === error.POSITION_UNAVAILABLE) {
         message = 'Position introuvable. Vérifiez le signal GPS.';
     } else if (error.code === error.TIMEOUT) {
         message = 'Délai trop long, tentative de nouvelle lecture...';
         scheduleRetry();
+        return;
     }
 
     updateStatus('Erreur géolocalisation : ' + message, true);
@@ -146,12 +157,17 @@ function startTracking() {
 
 function initializeTrackingStatus() {
     if (demandeStatus === 'delivered') {
-        stopTracking('Demande terminée. Le suivi est arrêté.');
+        stopTracking('✓ Demande terminée. Le suivi est arrêté.');
         return;
     }
 
     startTracking();
 }
+
+// Nettoyer le suivi si l'utilisateur quitte la page
+window.addEventListener('beforeunload', () => {
+    stopTracking();
+});
 
 if (demandeId) {
     initializeTrackingStatus();

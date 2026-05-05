@@ -93,7 +93,10 @@
 @push('styles')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-    .truck-icon-container { transition: transform 0.5s ease-in-out; }
+    .truck-icon-container { 
+        transition: transform 0.5s ease-in-out;
+        display: inline-block;
+    }
 </style>
 @endpush
 
@@ -121,29 +124,51 @@
 
     function initMap() {
         map = L.map('map', { zoomControl: false }).setView([31.79, -7.09], 6);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
         L.control.zoom({ position: 'bottomleft' }).addTo(map);
     }
 
-    // Calculer l'angle entre deux points pour la rotation du camion
+    /**
+     * Calcule l'angle entre deux points pour la rotation du camion
+     */
     function calculateHeading(start, end) {
         return (Math.atan2(end.lng - start.lng, end.lat - start.lat) * 180) / Math.PI;
     }
 
+    /**
+     * Met à jour l'affichage du suivi avec les positions reçues
+     */
     function updateTracking(points) {
-        if (!points.length) return;
+        if (!points || !points.length) {
+            updateStatusText("Aucune position disponible");
+            return;
+        }
         
-        const latlngs = points.map(p => [p.latitude || p.lat, p.longitude || p.lng]);
+        // Normaliser les points pour gérer latitude/longitude et lat/lng
+        const normalizedPoints = points.map(p => ({
+            latitude: p.latitude !== undefined ? p.latitude : p.lat,
+            longitude: p.longitude !== undefined ? p.longitude : p.lng,
+            time: p.time || ''
+        }));
+
+        const latlngs = normalizedPoints.map(p => [p.latitude, p.longitude]);
         const lastPos = latlngs[latlngs.length - 1];
 
-        // 1. Mise à jour ou création de la ligne
+        // 1. Mise à jour ou création de la ligne de route
         if (polyline) {
             polyline.setLatLngs(latlngs);
         } else {
-            polyline = L.polyline(latlngs, { color: '#2563eb', weight: 4, opacity: 0.6 }).addTo(map);
+            polyline = L.polyline(latlngs, { 
+                color: '#2563eb', 
+                weight: 4, 
+                opacity: 0.6,
+                lineCap: 'round'
+            }).addTo(map);
         }
 
-        // 2. Gestion du marqueur camion + rotation
+        // 2. Calcul de l'angle de rotation du camion
         let angle = 0;
         if (latlngs.length > 1) {
             const p1 = L.latLng(latlngs[latlngs.length - 2]);
@@ -151,6 +176,7 @@
             angle = calculateHeading(p1, p2);
         }
 
+        // 3. Création ou mise à jour du marqueur camion
         const customIcon = L.divIcon({
             html: truckSvg(),
             className: 'custom-truck',
@@ -161,61 +187,139 @@
         if (truckMarker) {
             truckMarker.setLatLng(lastPos);
             const iconElement = truckMarker.getElement()?.querySelector('.truck-icon-container');
-            if (iconElement) iconElement.style.transform = `rotate(${angle}deg)`;
+            if (iconElement) {
+                iconElement.style.transform = `rotate(${angle}deg)`;
+            }
         } else {
             truckMarker = L.marker(lastPos, { icon: customIcon }).addTo(map);
+            // Centrer sur le camion avec zoom approprié
             map.setView(lastPos, 14);
         }
 
-        document.getElementById('tracking-empty-overlay')?.classList.add('hidden');
-        updateStatusText("Position synchronisée");
+        // Masquer le message "En attente de signal"
+        const emptyOverlay = document.getElementById('tracking-empty-overlay');
+        if (emptyOverlay) {
+            emptyOverlay.classList.add('hidden');
+        }
+
+        updateStatusText(`✓ Synchronisé (${points.length} points)`);
     }
 
+    /**
+     * Met à jour le texte du statut de suivi
+     */
     function updateStatusText(msg) {
         const node = document.querySelector('#tracking-status span');
-        if (node) node.textContent = msg;
+        if (node) {
+            node.textContent = msg;
+        }
     }
 
+    /**
+     * Charge les données historiques initiales
+     */
     function fetchInitialData() {
-        if (!trackingUrl) return;
+        if (!trackingUrl) {
+            updateStatusText("Pas de demande sélectionnée");
+            return;
+        }
+
         fetch(trackingUrl)
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error(`Erreur ${res.status}`);
+                return res.json();
+            })
             .then(data => {
                 routePoints = data;
                 updateTracking(data);
-                if (data.length) map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+                if (data.length && polyline) {
+                    map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+                }
+            })
+            .catch(error => {
+                console.error('Erreur chargement données:', error);
+                updateStatusText("Erreur lors du chargement des positions");
             });
     }
 
+    /**
+     * Initialise la connexion Pusher pour les mises à jour en temps réel
+     */
     function initRealtime() {
-        if (!demandeId) return;
-        window.Pusher = Pusher;
-        window.Echo = new Echo({
-            broadcaster: 'pusher',
-            key: "{{ env('PUSHER_APP_KEY') }}",
-            cluster: "{{ env('PUSHER_APP_CLUSTER') }}",
-            forceTLS: true
-        });
+        if (!demandeId) {
+            console.log('Pas de demande sélectionnée pour le temps réel');
+            return;
+        }
 
-        window.Echo.private(`tracking.demande.${demandeId}`)
-            .listen('DriverPositionUpdated', (e) => {
-                routePoints.push(e);
-                updateTracking(routePoints);
+        try {
+            window.Pusher = Pusher;
+            window.Echo = new Echo({
+                broadcaster: 'pusher',
+                key: "{{ env('PUSHER_APP_KEY') }}",
+                cluster: "{{ env('PUSHER_APP_CLUSTER') }}",
+                forceTLS: true
             });
+
+            window.Echo.private(`tracking.demande.${demandeId}`)
+                .listen('DriverPositionUpdated', (event) => {
+                    console.log('Nouvelle position reçue:', event);
+                    
+                    const newPoint = {
+                        latitude: event.latitude,
+                        longitude: event.longitude,
+                        time: event.time || new Date().toLocaleTimeString('fr-FR')
+                    };
+
+                    routePoints.push(newPoint);
+                    updateTracking(routePoints);
+                })
+                .error((error) => {
+                    console.error('Erreur Pusher:', error);
+                    updateStatusText("Avertissement: Connexion temps réel perdue");
+                });
+
+            console.log('Suivi temps réel initialisé pour la demande', demandeId);
+        } catch (error) {
+            console.error('Erreur initialisation Pusher:', error);
+            updateStatusText("Avertissement: Temps réel indisponible");
+        }
     }
 
+    /**
+     * Sélectionne une nouvelle demande
+     */
     function selectDemande(id) {
         window.location.search = `demande_id=${id}`;
     }
 
+    /**
+     * Réinitialise la vue sur l'ensemble de la route
+     */
     function resetMapView() {
-        if (polyline) map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
+        if (polyline) {
+            map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
+        } else if (truckMarker) {
+            map.setView(truckMarker.getLatLng(), 14);
+        }
     }
 
+    /**
+     * Initialisation au chargement de la page
+     */
     document.addEventListener('DOMContentLoaded', () => {
+        console.log('Initialisation du suivi GPS...');
         initMap();
         fetchInitialData();
         initRealtime();
+    });
+
+    /**
+     * Nettoyage lors du déchargement
+     */
+    window.addEventListener('beforeunload', () => {
+        if (window.Echo) {
+            window.Echo.leave(`tracking.demande.${demandeId}`);
+        }
     });
 </script>
 @endpush

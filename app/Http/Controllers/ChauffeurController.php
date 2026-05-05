@@ -15,10 +15,54 @@ use Illuminate\Support\Facades\Log;
 use App\Events\MessageSent;
 use App\Events\UserTyping;
 use App\Http\Requests\Vehicule\StoreRequest;
-
+use App\Models\Vehicule;
 
 class ChauffeurController extends Controller
 {
+       public function profile()
+    {
+        $user = Auth::user();
+        $expediteur = $user->expediteur;
+
+        if (!$expediteur) {
+            return redirect()->route('home')->with('error', 'Accès non autorisé.');
+        }
+
+        return view('client.profile.edit', compact('user', 'expediteur'));
+    }
+
+    /**
+     * Mettre à jour le profil
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+        $chauffeur = $user->chauffeur;
+
+        if (!$chauffeur) {
+            return redirect()->route('home')->with('error', 'Accès non autorisé.');
+        }
+
+        $validated = $request->validate([
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'phone' => 'required|string|max:20',
+            'adresse_principale' => 'nullable|string|max:500',
+        ]);
+
+        $user->update([
+            'nom' => $validated['nom'],
+            'prenom' => $validated['prenom'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+        ]);
+
+
+        return redirect()
+            ->route('profile')
+            ->with('success', 'Profil mis à jour avec succès.');
+    }
     public function dashboard()
     {
         $user = Auth::user();
@@ -56,9 +100,48 @@ class ChauffeurController extends Controller
             'demandes'
         ));
     }
-    public function index()
+    public function available(Request $request)
     {
-        $demandes = Demande::latest()->paginate(10);
+        // Récupérer le chauffeur connecté pour éviter de lui montrer ses propres demandes
+        $chauffeur = Auth::user()->chauffeur;
+        
+        // Construire la requête de base (demandes en attente uniquement)
+        $query = Demande::where('status', 'pending')
+            ->with(['offres']) // Charger les offres pour compter
+        
+            // Exclure les demandes où le chauffeur a déjà proposé une offre
+            ->whereDoesntHave('offres', function($q) use ($chauffeur) {
+                $q->where('chauffeur_id', $chauffeur->id);
+            });
+        
+        // 🔍 RECHERCHE PAR VILLE
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('ville_depart', 'like', "%{$search}%")
+                  ->orWhere('ville_arrive', 'like', "%{$search}%");
+            });
+        }
+        
+        // 🏷️ FILTRE PAR TYPE DE MARCHANDISE
+        if ($request->filled('type')) {
+            $query->where('type_marchendise', $request->type);
+        }
+        
+        // ⚖️ FILTRE PAR POIDS MAX
+        if ($request->filled('poids')) {
+            $query->where('poids_kg', '<=', $request->poids);
+        }
+        
+        // 💰 FILTRE PAR PRIX MAX
+        if ($request->filled('prix')) {
+            $query->where('prix_estime', '<=', $request->prix);
+        }
+        
+        $demandes = $query->orderBy('created_at', 'desc')
+                          ->paginate(9)
+                          ->appends($request->query()); // Conserver les filtres dans la pagination
+        
         return view('driver.available', compact('demandes'));
     }
     public function toggleAvailability()
@@ -103,14 +186,10 @@ class ChauffeurController extends Controller
 
     public function vehicle()
     {
-        $user = Auth::user();
-        $chauffeur = $user->chauffeur;
 
-        if (! $chauffeur) {
-            return redirect()->route('home')->with('error', 'Accès non autorisé.');
-        }
-
-        return view('driver.vehicle', compact('chauffeur'));
+        $chauffeur = Auth::user()->chauffeur;
+        $vehicule = $chauffeur->vehicule ?? new Vehicule(); // utilise la relation
+        return view('driver.vehicle', compact('vehicule'));
     }
 
     public function updateVehicle(StoreRequest $request)
@@ -198,4 +277,31 @@ class ChauffeurController extends Controller
             'time' => $message->created_at->format('H:i'),
         ]);
     }
+    public function marquerLivree(Demande $demande)
+    {
+        // Vérifier que le chauffeur est bien assigné à cette demande
+        $offre = $demande->offres()->where('chauffeur_id', Auth::user()->chauffeur->id)
+            ->where('status', 'acceptee')->first();
+        if (!$offre) {
+            return back()->with('error', 'Action non autorisée.');
+        }
+
+        // Vérifier que la demande est bien en cours
+        if ($demande->status !== 'in_progress') {
+            return back()->with('error', 'Impossible de livrer une demande non en cours.');
+        }
+
+        // Mettre à jour les statuts
+        $demande->update(['status' => 'delivered']);
+        $offre->update(['status' => 'livree']); // ou 'completed'
+
+        // Optionnel : enregistrer la date de livraison effective
+        // $demande->update(['delivered_at' => now()]);
+
+        // Notifier le client (via notification ou event)
+        // event(new DemandeLivree($demande));
+
+        return redirect()->route('driver.trips')->with('success', 'Livraison confirmée. Merci !');
+    }
+  
 }

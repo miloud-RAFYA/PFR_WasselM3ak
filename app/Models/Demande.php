@@ -24,10 +24,12 @@ class Demande extends Model
         'status',
         'expediteur_id'
     ];
-    public function offres(){
+    public function offres()
+    {
         return $this->hasMany(Offre::class);
     }
-    public function conversation(){
+    public function conversation()
+    {
         return $this->hasMany(Conversation::class);
     }
 
@@ -44,17 +46,31 @@ class Demande extends Model
             ->exists();
     }
 
-    public function evaluation(){
+    public function evaluation()
+    {
         return $this->hasOne(Evaluation::class);
     }
-    public function suivres(){
+    public function suivres()
+    {
         return $this->hasMany(Suive::class);
     }
-    public function Paiement(){
-        return $this->hasOne(Paiement::class);
+    // app/Models/Demande.php
+    public function paiements()
+    {
+        return $this->hasMany(Paiement::class);
     }
-    public function expediteur(){
+
+    public function dernierPaiement()
+    {
+        return $this->hasOne(Paiement::class)->latestOfMany();
+    }
+
+    public function estPayee()
+    {
+        return $this->paiements()->whereIn('status', ['paid', 'confirmed'])->exists();
+    }
+    public function expediteur()
+    {
         return $this->belongsTo(Expediteur::class);
     }
-    
 }

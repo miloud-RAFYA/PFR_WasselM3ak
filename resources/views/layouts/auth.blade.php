@@ -53,7 +53,6 @@
                             900: '#111827',
                         }
                     },
-                    },
                     boxShadow: {
                         'classic': 'inset 1px 1px 0px rgba(255,255,255,0.8), inset -1px -1px 0px rgba(0,0,0,0.1), 2px 2px 4px rgba(0,0,0,0.1)',
                         'classic-inset': 'inset 2px 2px 4px rgba(0,0,0,0.1), inset -2px -2px 4px rgba(255,255,255,0.8)',
@@ -71,10 +70,31 @@
 
     @stack('styles')
 </head>
-<body class="font-sans antialiased text-slate-800 bg-white">
+<body class="font-sans antialiased text-slate-800 bg-gradient-to-br from-gray-50 to-gray-100">
+
+    <!-- Flash Messages -->
+    @if(session('success'))
+        <div x-data="{ show: true }" 
+             x-show="show" 
+             x-init="setTimeout(() => show = false, 5000)"
+             class="fixed top-4 right-4 z-50 bg-success text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5"></i>
+            <span>{{ session('success') }}</span>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div x-data="{ show: true }" 
+             x-show="show" 
+             x-init="setTimeout(() => show = false, 5000)"
+             class="fixed top-4 right-4 z-50 bg-error text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+            <span>{{ session('error') }}</span>
+        </div>
+    @endif
 
     <!-- Main Content -->
-    <main class="min-h-screen">
+    <main class="min-h-screen flex items-center justify-center p-4">
         @yield('content')
     </main>
 
@@ -87,5 +107,4 @@
 
     @stack('scripts')
 </body>
-</html></content>
-<parameter name="filePath">c:\Users\Youcode\Desktop\PFR_WasselM3ak\resources\views\layouts\auth.blade.php
+</html>
