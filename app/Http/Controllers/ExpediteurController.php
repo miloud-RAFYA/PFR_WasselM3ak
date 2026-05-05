@@ -17,6 +17,30 @@ class ExpediteurController extends Controller
     /**
      * Dashboard du client
      */
+    public function requestsSuiviGps(Request $request)
+    {
+        $user = Auth::user();
+        $expediteur = $user->expediteur;
+
+        if (!$expediteur) {
+            return redirect()->route('home')->with('error', 'Accès non autorisé.');
+        }
+
+        $demandes = Demande::where('expediteur_id', $expediteur->id)
+            ->where('status', 'in_progress')
+            ->with(['offres.chauffeur.user', 'suivres'])
+            ->latest()
+            ->paginate(10);
+
+        $selectedDemande = $demandes->first();
+        $selectedDemandeId = $request->query('demande_id');
+
+        if ($selectedDemandeId) {
+            $selectedDemande = $demandes->firstWhere('id', $selectedDemandeId) ?? $selectedDemande;
+        }
+
+        return view('client.requests.suivi-gps', compact('demandes', 'selectedDemande'));
+    }
     public function dashboard()
     {
         $user = Auth::user();
@@ -55,30 +79,6 @@ class ExpediteurController extends Controller
         return view('client.dashboard', compact('expediteur', 'demandes', 'demandesRecentes', 'chauffeursDisponibles', 'stats'));
     }
 
-    public function requestsSuiviGps(Request $request)
-    {
-        $user = Auth::user();
-        $expediteur = $user->expediteur;
-
-        if (!$expediteur) {
-            return redirect()->route('home')->with('error', 'Accès non autorisé.');
-        }
-
-        $demandes = Demande::where('expediteur_id', $expediteur->id)
-            ->where('status', 'in_progress')
-            ->with(['offres.chauffeur.user', 'suivres'])
-            ->latest()
-            ->paginate(10);
-
-        $selectedDemande = $demandes->first();
-        $selectedDemandeId = $request->query('demande_id');
-
-        if ($selectedDemandeId) {
-            $selectedDemande = $demandes->firstWhere('id', $selectedDemandeId) ?? $selectedDemande;
-        }
-
-        return view('client.requests.suivi-gps', compact('demandes', 'selectedDemande'));
-    }
 
     public function messages()
     {
@@ -224,12 +224,12 @@ class ExpediteurController extends Controller
             'adresse_principale' => 'nullable|string|max:500',
         ]);
 
-        $user->update([
-            'nom' => $validated['nom'],
-            'prenom' => $validated['prenom'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'],
-        ]);
+        $user->nom =$validated['nom'];
+        $user->prenom = $validated['prenom'];
+        $user->email = $validated['email'];
+        $user->phone = $validated['phone'];
+        $user->save();
+    
 
         $expediteur->update([
             'adresse_principale' => $validated['adresse_principale'] ?? $expediteur->adresse_principale,
@@ -239,4 +239,51 @@ class ExpediteurController extends Controller
             ->route('profile')
             ->with('success', 'Profil mis à jour avec succès.');
     }
+
+
+    public function acceptedOffers()
+{
+    $user = Auth::user();
+    $expediteur = $user->expediteur;
+
+    $query = Offre::whereHas('demande', function ($q) use ($expediteur) {
+        $q->where('expediteur_id', $expediteur->id);
+    })->where('status', 'acceptee'); // selon votre colonne status (acceptee / accepted)
+
+    if (request('status')) {
+        $query->whereHas('demande', function ($q) {
+            $q->where('status', request('status'));
+        });
+    }
+
+    $acceptedOffres = $query->with(['demande', 'chauffeur.user', 'chauffeur.vehicule'])
+                            ->orderBy('updated_at', 'desc')
+                            ->paginate(10);
+
+    return view('client.requests.accepted_offers', compact('acceptedOffres'));
+}
+public function refuserOffre(Offre $offre)
+{
+    $demande = $offre->demande;
+
+    if ($demande->expediteur_id !== Auth::user()->expediteur->id) {
+        abort(403, 'Action non autorisée');
+    }
+
+    if ($demande->status !== 'in_progress') {
+        return back()->with('error', 'Impossible de refuser cette offre, la demande n\'est plus modifiable.');
+    }
+
+    $offre->update(['status' => 'refusee']);
+
+    $demande->update([
+        'status' => 'pending',
+        'chauffeur_id' => null,
+        'prix_final' => null,
+    ]);
+
+
+    return redirect()->route('client.accepted_offers')
+                     ->with('success', 'L\'offre a été refusée et la demande est de nouveau en attente.');
+}
 }

@@ -3,184 +3,208 @@
 @section('title', 'Demandes disponibles')
 
 @section('sidebar')
-    @include('driver.partials.sidebar', ['active' => 'available'])
+@include('driver.partials.sidebar', ['active' => 'available'])
 @endsection
 
-@section('page-title', 'Demandes disponibles')
-
 @section('content')
-    <div class="space-y-6">
+<div class="space-y-8">
 
-        {{-- 🔍 SEARCH + FILTER --}}
-        <div class="flex items-center justify-between">
-            <div class="flex items-center justify-between">
+    {{-- En-tête --}}
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Demandes disponibles</h1>
+        <p class="text-slate-500 mt-1">Consultez et proposez vos services sur les annonces récentes</p>
+    </div>
 
-                {{-- 🔍 SEARCH --}}
-                <form method="GET" class="flex items-center gap-2">
-
-                    <div class="relative">
-                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Ville..."
-                            class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-500">
-                    </div>
-
-                    {{-- 🔽 FILTER BUTTON --}}
-                    <div x-data="{ open: false }" class="relative">
-
-                        <button type="button" @click="open = !open"
-                            class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center gap-2">
-                            <i data-lucide="filter" class="w-4 h-4"></i>
-                            Filtrer
-                        </button>
-
-                        {{-- DROPDOWN --}}
-                        <div x-show="open" @click.outside="open = false"
-                            class="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-xl p-4 z-50">
-
-                            {{-- TYPE --}}
-                            <div class="mb-3">
-                                <label class="text-sm text-slate-600">Type</label>
-                                <select name="type" class="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2">
-                                    <option value="">Tous</option>
-                                    <option value="Meubles">Meubles</option>
-                                    <option value="Cartons">Cartons</option>
-                                    <option value="Électroménager">Électroménager</option>
-                                </select>
-                            </div>
-
-                            {{-- POIDS --}}
-                            <div class="mb-3">
-                                <label class="text-sm text-slate-600">Poids max (kg)</label>
-                                <input type="number" name="poids" value="{{ request('poids') }}"
-                                    class="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2">
-                            </div>
-
-                            {{-- PRIX --}}
-                            <div class="mb-3">
-                                <label class="text-sm text-slate-600">Prix max</label>
-                                <input type="number" name="prix" value="{{ request('prix') }}"
-                                    class="w-full mt-1 border border-slate-200 rounded-lg px-3 py-2">
-                            </div>
-
-                            {{-- ACTIONS --}}
-                            <div class="flex gap-2 mt-4">
-
-                                <button type="submit" class="flex-1 bg-primary-500 text-white py-2 rounded-lg">
-                                    Appliquer
-                                </button>
-
-                                <a href="{{ route('driver.available') }}" class="flex-1 text-center border py-2 rounded-lg">
-                                    Reset
-                                </a>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </form>
-
+    {{-- Barre de recherche + filtre --}}
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <form method="GET" class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+            <div class="relative flex-1 sm:min-w-[260px]">
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                <input type="text" name="search" value="{{ request('search') }}"
+                       placeholder="Ville de départ ou d'arrivée"
+                       class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition">
             </div>
-        </div>
 
+            {{-- Filtre dropdown amélioré --}}
+            <div x-data="{ open: false }" class="relative">
+                <button type="button" @click="open = !open"
+                        class="px-5 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 flex items-center gap-2 transition shadow-sm">
+                    <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+                    <span>Filtres</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" :class="{ 'rotate-180': open }"></i>
+                </button>
 
-        {{-- 📦 LISTE DES DEMANDES --}}
-        <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                <div x-show="open" @click.away="open = false"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 translate-y-2"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     class="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl p-5 z-50">
+                    <h4 class="font-semibold text-slate-800 mb-3">Affiner la recherche</h4>
 
-            @forelse($demandes as $demande)
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Type de marchandise</label>
+                            <select name="type" class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-primary-500">
+                                <option value="">Tous</option>
+                                <option value="Meubles" {{ request('type') == 'Meubles' ? 'selected' : '' }}>🪑 Meubles</option>
+                                <option value="Cartons" {{ request('type') == 'Cartons' ? 'selected' : '' }}>📦 Cartons</option>
+                                <option value="Électroménager" {{ request('type') == 'Électroménager' ? 'selected' : '' }}>🔌 Électroménager</option>
+                                <option value="Palettes" {{ request('type') == 'Palettes' ? 'selected' : '' }}>📐 Palettes</option>
+                                <option value="Véhicules" {{ request('type') == 'Véhicules' ? 'selected' : '' }}>🚗 Véhicules</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Poids max (kg)</label>
+                            <input type="number" name="poids" value="{{ request('poids') }}"
+                                   class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-primary-500"
+                                   placeholder="ex: 500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Prix max (DH)</label>
+                            <input type="number" name="prix" value="{{ request('prix') }}"
+                                   class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-primary-500"
+                                   placeholder="ex: 1000">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 mt-5 pt-2">
+                        <button type="submit"
+                                class="flex-1 bg-primary-500 hover:bg-primary-600 text-white py-2 rounded-xl transition shadow-sm">
+                            Appliquer
+                        </button>
+                        <a href="{{ route('driver.available') }}"
+                           class="flex-1 text-center border border-slate-200 py-2 rounded-xl hover:bg-slate-50 transition">
+                            Réinitialiser
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        @if(request()->anyFilled(['search', 'type', 'poids', 'prix']))
+            <div class="text-sm text-slate-500">
+                Filtres actifs – 
+                <a href="{{ route('driver.available') }}" class="text-primary-500 hover:underline">Tout afficher</a>
+            </div>
+        @endif
+    </div>
+
+    {{-- Nombre de résultats --}}
+    <div class="text-sm text-slate-500">
+        {{ $demandes->total() }} demande(s) trouvée(s)
+    </div>
+
+    {{-- Grille des demandes --}}
+    @if($demandes->count())
+        <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            @foreach($demandes as $demande)
                 @php
                     $type = strtolower($demande->type_marchendise);
                     if (str_contains($type, 'frais') || str_contains($type, 'alimentaire')) {
                         $imageUrl = asset('images/image.png');
-                    } elseif (
-                        str_contains($type, 'électronique') ||
-                        str_contains($type, 'electronique') ||
-                        str_contains($type, 'tech')
-                    ) {
-                        $imageUrl = asset('images/packages.png');
                     } else {
                         $imageUrl = asset('images/packages.png');
                     }
                 @endphp
-                <div
-                    class="group overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
-                    <div class="relative h-52 overflow-hidden">
-                        <img src="{{ $imageUrl }}" alt="Marchandise {{ $demande->type_marchendise }}"
-                            class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/10 to-transparent">
-                        </div>
-                        <div class="absolute inset-x-0 top-0 flex items-center justify-between px-5 py-4">
-                            <span
-                                class="rounded-full bg-primary-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">{{ ucfirst($demande->type_marchendise) }}</span>
-                            <span
-                                class="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-800">{{ $demande->poids_kg }}
-                                kg</span>
-                        </div>
-                        <div class="absolute left-5 bottom-5 text-white">
-                            <h3 class="text-2xl font-semibold tracking-tight">{{ $demande->ville_depart }} →
-                                {{ $demande->ville_arrive }}</h3>
-                            <p class="text-sm text-slate-200/90 mt-1">{{ $demande->created_at->format('d M Y') }}</p>
-                        </div>
-                    </div>
-
-                    <div class="p-6 space-y-5">
-                        <div class="flex flex-wrap items-center justify-between gap-3">
-                            <div class="space-y-1">
-                                <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Référence</p>
-                                <p class="text-lg font-semibold text-slate-900">{{ $demande->reference }}</p>
-                            </div>
-                            <span
-                                class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] {{ 'bg-slate-100 text-slate-700' }}">
-                                Nouvelle demande
+                <div class="group bg-white rounded-2xl border border-slate-200 shadow-soft hover:shadow-primary transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    {{-- Image --}}
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="{{ $imageUrl }}" alt="{{ $demande->type_marchendise }}"
+                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        <div class="absolute top-3 left-3">
+                            <span class="inline-flex items-center gap-1 bg-white/90 backdrop-blur-sm text-slate-800 text-xs font-semibold px-2.5 py-1 rounded-full">
+                                <i data-lucide="package" class="w-3 h-3"></i>
+                                {{ ucfirst($demande->type_marchendise) }}
                             </span>
                         </div>
-
-                        <div class="grid gap-4 sm:grid-cols-3 text-sm text-slate-600">
-                            <div class="rounded-3xl bg-slate-50 p-4 shadow-sm">
-                                <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Départ</p>
-                                <p class="mt-2 font-semibold text-slate-900">{{ $demande->ville_depart }}</p>
-                            </div>
-                            <div class="rounded-3xl bg-slate-50 p-4 shadow-sm">
-                                <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Arrivée</p>
-                                <p class="mt-2 font-semibold text-slate-900">{{ $demande->ville_arrive }}</p>
-                            </div>
-                            <div class="rounded-3xl bg-slate-50 p-4 shadow-sm">
-                                <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Prix estimé</p>
-                                <p class="mt-2 font-semibold text-slate-900">{{ $demande->prix_estime }} DH</p>
+                        <div class="absolute bottom-3 left-3 right-3">
+                            <div class="flex justify-between items-end">
+                                <div>
+                                    <h3 class="text-white font-bold text-lg leading-tight">
+                                        {{ $demande->ville_depart }} → {{ $demande->ville_arrive }}
+                                    </h3>
+                                    <p class="text-white/80 text-xs mt-0.5">Réf: {{ $demande->reference }}</p>
+                                </div>
+                                <span class="bg-white/20 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded-lg">
+                                    {{ $demande->poids_kg }} kg
+                                </span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="border-t border-slate-200 bg-slate-50 px-6 py-4 flex items-center justify-between gap-3">
-                        <div class="text-sm text-slate-600">
-                            <p class="uppercase tracking-[0.2em] text-xs text-slate-400">Offres</p>
-                            <p class="font-medium">{{ $demande->offres->count() }}</p>
+                    {{-- Corps --}}
+                    <div class="p-5 space-y-4">
+                        <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center gap-1 text-slate-500">
+                                <i data-lucide="calendar" class="w-4 h-4"></i>
+                                <span>{{ $demande->created_at->format('d/m/Y') }}</span>
+                            </div>
+                            <div class="flex items-center gap-1 text-slate-500">
+                                <i data-lucide="gavel" class="w-4 h-4"></i>
+                                <span>{{ $demande->offres->count() }} offre(s)</span>
+                            </div>
                         </div>
-                        <form method="POST" action="{{ route('driver.offres.create',$demande->id) }}"
-                            class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-primary-500 hover:text-white">
-                            @csrf
-                            <button type='supmit'>
-                                Proposer
-                            </button>
-                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                        </form>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-slate-50 rounded-xl p-2 text-center">
+                                <p class="text-xs text-slate-500">Prix estimé</p>
+                                <p class="text-lg font-bold text-primary-600">{{ number_format($demande->prix_estime, 0, ',', ' ') }} DH</p>
+                            </div>
+                            <div class="bg-slate-50 rounded-xl p-2 text-center">
+                                <p class="text-xs text-slate-500">Trajet</p>
+                                <p class="text-sm font-medium text-slate-700 truncate">{{ $demande->ville_depart }} → {{ $demande->ville_arrive }}</p>
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <a href="{{ route('driver.offres.create', $demande->id) }}"
+                               class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl transition shadow-md hover:shadow-lg font-medium">
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                                Proposer une offre
+                            </a>
+                        </div>
                     </div>
                 </div>
-            @empty
-
-                <div class="text-center py-10 bg-white rounded-xl shadow-sm">
-                    <p class="text-slate-500">Aucune demande disponible</p>
-                </div>
-            @endforelse
-
+            @endforeach
         </div>
 
-        {{-- 📄 PAGINATION --}}
-        <div>
-            {{ $demandes->links() }}
+        {{-- Pagination --}}
+        <div class="mt-8">
+            {{ $demandes->appends(request()->query())->links('pagination::tailwind') }}
         </div>
-
-    </div>
+    @else
+        <div class="bg-white rounded-2xl shadow-soft border border-slate-200 p-12 text-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-slate-100 rounded-full mb-5">
+                <i data-lucide="inbox" class="w-10 h-10 text-slate-400"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-slate-800 mb-2">Aucune demande disponible</h3>
+            <p class="text-slate-500">Revenez plus tard, de nouvelles annonces seront publiées.</p>
+        </div>
+    @endif
+</div>
 @endsection
+
+@push('styles')
+<style>
+    .shadow-soft {
+        box-shadow: 0 8px 20px rgba(0,0,0,0.04), 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .shadow-primary:hover {
+        box-shadow: 0 20px 30px -12px rgba(2,124,177,0.2);
+    }
+    .transition-all {
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 200ms;
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+    });
+</script>
+@endpush

@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('conversations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('demande_id')->constrained('demandes')->onDelete('cascade');
-            $table->string('last_message')->nullable();
-            $table->timestamps();
+        Schema::table('chauffeurs', function (Blueprint $table) {
+            $table->text('commentaire_admin')->nullable();
         });
     }
 
@@ -24,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('conversations');
+        Schema::table('Chauffeur', function (Blueprint $table) {
+            //
+        });
     }
 };

@@ -18,4 +18,5 @@ class Document extends Model
     public function chauffeur(){
         return $this->belongsTo(Chauffeur::class);
     }
+    
 }

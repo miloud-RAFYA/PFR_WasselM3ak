@@ -11,22 +11,30 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+use function Laravel\Prompts\search;
+
 class DemandeController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $expediteur = $user->expediteur;
         if (!$expediteur) {
             return redirect()->route('home')->with('error', 'Accès non autorisé.');
         }
-        $ds = Demande::where('expediteur_id', $expediteur->id)
-            ->with('offres.chauffeur.user', 'expediteur')
-            ->latest()
-            ->paginate(10);
-        $demandes = new DemandeCollection($ds);
+        $query = Demande::where('expediteur_id', $expediteur->id);
+        if($request->has('status')){
+           $query->where('status',$request->status);
+        }
+        if($request->has('search')){
+            $query->where(function($q)use ($request){
+               $q->where('ville_depart','like','%'.$request->search.'%')
+               ->orWhere('ville_arrive','like','%'.$request->search.'%');
+            });
+        }
+        $demandes = new DemandeCollection($query->latest()->paginate(10)->withQueryString());
         return view('client.requests.index', compact('demandes'));
     }
     public function create()
